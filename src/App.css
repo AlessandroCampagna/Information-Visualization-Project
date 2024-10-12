@@ -1,38 +1,81 @@
-.App {
-  text-align: center;
+/* Reset default margins and paddings */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body, html, #root {
+  height: 100%;
+  font-family: Arial, sans-serif;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Container for the entire app */
+.app-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  height: 100vh;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 200px;
+  background-color: #333;
   color: white;
+  padding: 20px;
 }
 
-.App-link {
-  color: #61dafb;
+.sidebar h2 {
+  margin-bottom: 10px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li {
+  margin: 10px 0;
+}
+
+/* Dashboard grid layout */
+.dashboard {
+  flex: 1;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 20px;
+  background-color: #f4f4f4;
+}
+
+/* Top container spans both columns */
+.container.large {
+  grid-column: span 2;
+  background-color: #e0e0e0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  padding: 20px;
+}
+
+/* Small containers for bottom row */
+.container.small {
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+/* Media Query for responsiveness */
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: 1fr;
   }
-  to {
-    transform: rotate(360deg);
+
+  .container.large {
+    grid-column: span 1;
   }
 }
