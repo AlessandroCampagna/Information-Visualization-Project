@@ -15,25 +15,28 @@ export function createLineChart(data) {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
+  // Group the data by state and year
   const nestedData = d3.group(data, d => d.state, d => d.year);
   const states = Array.from(nestedData.keys());
   const years = Array.from(new Set(data.map(d => d.year))).sort();
 
+  // Create x and y scales
   const x = d3.scalePoint()
     .domain(years)
     .range([0, width]);
 
-  let y = d3.scaleLinear()
+  const y = d3.scaleLinear()
     .domain([0, d3.max(states, state => d3.max(years, year => nestedData.get(state).get(year)?.length || 0))])
     .range([height, 0]);
 
+  // Create x and y axes
   const xAxis = svg.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
-  let yAxis = svg.append("g").call(d3.axisLeft(y));
+  const yAxis = svg.append("g").call(d3.axisLeft(y));
 
-  const color = d3.scaleOrdinal(d3.schemeCategory10).domain(states);
+  // Tooltip setup
   const tooltip = d3.select(".LineChart")
     .append("div")
     .style("opacity", 0)
@@ -45,6 +48,10 @@ export function createLineChart(data) {
     .style("padding", "10px")
     .style("position", "absolute");
 
+  // Use a single color (subtle shade of red) for all lines
+  const lineColor = "#d66a6a"; // A less vibrant shade of red
+
+  // Function to draw lines
   function drawLines(filteredData, xScale, xDomain) {
     svg.selectAll(".line").remove();
 
@@ -60,15 +67,16 @@ export function createLineChart(data) {
         .datum(stateData)
         .attr("class", "line")
         .attr("fill", "none")
-        .attr("stroke", "darkgrey")
+        .attr("stroke", lineColor) // Apply the subtle red color to all lines
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
           .x(d => xScale(d.xValue))
           .y(d => y(d.count))
         );
 
+      // Tooltip events
       line.on("mouseover", function(event, d) {
-        d3.select(this).attr("stroke", "yellow").attr("stroke-width", 3);
+        d3.select(this).attr("stroke-width", 3);
         tooltip.style("opacity", 1);
       })
       .on("mousemove", function(event, d) {
@@ -78,7 +86,7 @@ export function createLineChart(data) {
           .style("top", (yPos) + "px");
       })
       .on("mouseout", function() {
-        d3.select(this).attr("stroke", "darkgrey").attr("stroke-width", 1.5);
+        d3.select(this).attr("stroke-width", 1.5);
         tooltip.style("opacity", 0);
       });
     });
@@ -86,6 +94,7 @@ export function createLineChart(data) {
 
   drawLines(nestedData, x, years);
 
+  // Labels and reset button
   svg.append("text")
     .attr("text-anchor", "end")
     .attr("x", width)
@@ -99,6 +108,7 @@ export function createLineChart(data) {
     .attr("x", -margin.top)
     .text("Number of Incidents");
 
+  // Click on year to update the state and filter by months
   xAxis.selectAll("text").style("cursor", "pointer")
     .on("click", function(event, year) {
       const filteredData = d3.group(data.filter(d => d.year === year), d => d.state, d => d.month);
@@ -113,6 +123,9 @@ export function createLineChart(data) {
       d3.select("#resetButton").style("display", "block");
     });
 
+  // Reset button
   d3.select(".LineChart").append("button").attr("id", "resetButton").text("Reset")
-    .style("display", "none").on("click", function() { createLineChart(data); });
+    .style("display", "none").on("click", function() {
+      createLineChart(data); // Reset chart to full-year view
+    });
 }
