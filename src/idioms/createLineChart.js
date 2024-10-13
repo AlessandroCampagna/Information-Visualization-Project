@@ -1,5 +1,3 @@
-// src/idioms/createLineChart.js
-
 import * as d3 from 'd3';
 
 export function createLineChart(data) {

@@ -1,19 +1,17 @@
-// src/App.js
-
 import React, { useEffect } from 'react';
 import './App.css';
-import { init } from './Init'; // Import the init function for the visualizations
+import { createCharts } from './idioms/CreateCharts'; // Import the init function for the visualizations
 
 function App() {
   useEffect(() => {
-    // Call the init function to load data and render visualizations
-    init();
+    createCharts(); // Initialize the visualizations
   }, []);
 
   return (
     <div className="app-container">
       <aside className="sidebar">
-        <h2>Sidebar</h2>
+        <h2>Gun Violence</h2>
+        <h3>United States</h3>
         <ul>
           <li>Dashboard</li>
           <li>Settings</li>
@@ -21,9 +19,9 @@ function App() {
         </ul>
       </aside>
       <main className="dashboard">
-        <div className="container large LineChart">Top Container</div>
-        <div className="container small">Bottom Left</div>
-        <div className="container small">Bottom Right</div>
+        <div className="container large LineChart"></div>
+        <div className="container small">Hexagon Map</div>
+        <div className="container small">Scatter Plot</div>
       </main>
     </div>
   );
