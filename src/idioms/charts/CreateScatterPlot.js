@@ -15,30 +15,36 @@ export function createScatterPlot(data) {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Parse the date format
-  const parseDate = d3.timeParse("%Y-%m-%d");
+  // Group data by state and year
+  const groupedData = d3.group(data, d => d.state, d => {
+    // Assuming `d.date` is already a Date object
+    return d.date ? d.date.getFullYear() : null; // Extract year directly from the Date object
+  });
 
-  // Convert date strings to actual date objects and group by state and month/year
-  const nestedData = d3.group(data, d => d.state, d => d3.timeFormat("%Y-%m")(parseDate(d.date)));
+  // Check for grouped data
+  console.log("Grouped Data: ", groupedData);
 
-  const scatterData = Array.from(nestedData, ([state, months]) => {
-    return Array.from(months, ([month, incidents]) => {
+  const scatterData = Array.from(groupedData, ([state, yearGroup]) => {
+    return Array.from(yearGroup, ([year, incidents]) => {
       return {
         state: state,
-        month: month,
-        total_injured: d3.sum(incidents, d => d.n_injured), // Total injuries for the month
-        total_killed: d3.sum(incidents, d => d.n_killed)    // Total kills for the month
+        year: year,
+        total_injured: d3.sum(incidents, d => d.n_injured), // Total injuries for the state and year
+        total_killed: d3.sum(incidents, d => d.n_killed)    // Total kills for the state and year
       };
     });
-  }).flat(); // Flatten the array to a single level
+  }).flat(); // Flatten the array to make it a single array of objects
+
+  // Log the aggregated data
+  console.log("Aggregated Data: ", scatterData);
 
   // Create x and y scales
   const x = d3.scaleLinear()
-    .domain([0, d3.max(scatterData, d => d.total_killed)]) // Set the max for the x-axis based on the max kills
+    .domain([0, d3.max(scatterData, d => d.total_killed) || 1]) // Ensure there is a max value for scaling
     .range([0, width]);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(scatterData, d => d.total_injured)]) // Set the max for the y-axis based on the max injuries
+    .domain([0, d3.max(scatterData, d => d.total_injured) || 1]) // Ensure there is a max value for scaling
     .range([height, 0]);
 
   // Create x and y axes
@@ -65,7 +71,7 @@ export function createScatterPlot(data) {
 
   // Draw scatter plot points
   svg.selectAll(".dot")
-    .data(scatterData) // Bind the grouped and aggregated dataset
+    .data(scatterData) // Bind the data
     .enter()
     .append("circle")
     .attr("class", "dot")
@@ -78,11 +84,21 @@ export function createScatterPlot(data) {
       tooltip.style("opacity", 1);
     })
     .on("mousemove", function(event, d) {
-      const [xPos, yPos] = d3.pointer(event);
-      tooltip.html(`State: ${d.state}<br>Month: ${d.month}<br>Total Injuries: ${d.total_injured}<br>Total Kills: ${d.total_killed}`)
-        .style("left", (xPos + 70) + "px")
-        .style("top", (yPos) + "px");
-    })
+      // Update tooltip HTML content
+      tooltip.html(`State: ${d.state}<br>Year: ${d.year}<br>Total Injuries: ${d.total_injured}<br>Total Kills: ${d.total_killed}`);
+
+      // Measure the tooltip size
+      const tooltipWidth = tooltip.node().getBoundingClientRect().width; // Get the tooltip width
+      const tooltipHeight = tooltip.node().getBoundingClientRect().height; // Get the tooltip height
+
+      // Calculate the tooltip position to center it in the viewport
+      const tooltipX = (window.innerWidth - tooltipWidth) / 2; // Center horizontally
+      const tooltipY = (window.innerHeight - tooltipHeight) / 2; // Center vertically
+
+      // Update tooltip position
+      tooltip.style("left", tooltipX +100+ "px")
+          .style("top", tooltipY + "px");
+  })
     .on("mouseout", function() {
       d3.select(this).attr("fill", dotColor).attr("r", 5); // Revert to original color and size
       tooltip.style("opacity", 0);
@@ -107,4 +123,5 @@ export function createScatterPlot(data) {
     .style("display", "none").on("click", function() {
       createScatterPlot(data); // Reset chart to show all data again
     });
+    
 }

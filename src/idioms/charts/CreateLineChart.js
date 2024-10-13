@@ -31,10 +31,10 @@ export function createLineChart(data) {
   const months = Array.from(new Set(data.map(d => d3.timeFormat("%Y-%m")(d.date)))).sort(d3.ascending);
   
   // Create x and y scales
-  const x = d3.scaleBand()
+  const x = d3.scalePoint()
     .domain(months) // Use the month-year format as the domain
     .range([0, width])
-    .padding(0.1); // Add some padding between bars
+    .padding(0.5); // Add some padding between ticks
 
   const y = d3.scaleLinear()
     .domain([0, d3.max(states, state => d3.max(months, month => {
@@ -46,7 +46,11 @@ export function createLineChart(data) {
   // Create x and y axes
   const xAxis = svg.append("g")
     .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%b %Y"))); // Show month and year format
+    .call(d3.axisBottom(x)) // Show month and year format
+    .selectAll("text") // Select all text elements for custom formatting
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-45)") // Rotate for better visibility
+    .style("font-size", "10px"); // Adjust font size if needed
 
   const yAxis = svg.append("g").call(d3.axisLeft(y));
 
