@@ -21,7 +21,7 @@ function App() {
       <main className="dashboard">
         <div className="container large LineChart"></div>
         <div className="container small">Hexagon Map</div>
-        <div className="container small">Scatter Plot</div>
+        <div className="container small ScatterPlot"></div>
       </main>
     </div>
   );

@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import { createLineChart } from './charts/CreateLineChart';
+import { createScatterPlot } from './charts/CreateScatterPlot';
 // Import other chart creation functions here...
 
 // Shared state object
@@ -17,6 +18,7 @@ function updateCharts(data) {
 
   // Update all charts with the filtered data
   createLineChart(filteredData);
+  createScatterPlot(filteredData);
   // Call other chart creation functions here, e.g., createScatterPlot(filteredData), etc.
 }
 
