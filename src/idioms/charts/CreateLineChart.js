@@ -15,24 +15,38 @@ export function createLineChart(data) {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Group the data by state and year
-  const nestedData = d3.group(data, d => d.state, d => d.year);
-  const states = Array.from(nestedData.keys());
-  const years = Array.from(new Set(data.map(d => d.year))).sort();
+  // Parse the date format
+  const parseDate = d3.timeParse("%Y-%m-%d");
 
+  // Convert date strings to actual date objects for easier manipulation
+  data.forEach(d => {
+    d.date = parseDate(d.date); // Assuming 'date' field exists in the data in YYYY-MM-DD format
+  });
+
+  // Group the data by state and by month
+  const nestedData = d3.group(data, d => d.state, d => d3.timeFormat("%Y-%m")(d.date)); // Group by Year-Month
+  const states = Array.from(nestedData.keys());
+  
+  // Create an array of months for the x-axis
+  const months = Array.from(new Set(data.map(d => d3.timeFormat("%Y-%m")(d.date)))).sort(d3.ascending);
+  
   // Create x and y scales
-  const x = d3.scalePoint()
-    .domain(years)
-    .range([0, width]);
+  const x = d3.scaleBand()
+    .domain(months) // Use the month-year format as the domain
+    .range([0, width])
+    .padding(0.1); // Add some padding between bars
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(states, state => d3.max(years, year => nestedData.get(state).get(year)?.length || 0))])
+    .domain([0, d3.max(states, state => d3.max(months, month => {
+      const monthlyData = nestedData.get(state).get(month);
+      return monthlyData ? monthlyData.length : 0;
+    }))])
     .range([height, 0]);
 
   // Create x and y axes
   const xAxis = svg.append("g")
     .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+    .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%b %Y"))); // Show month and year format
 
   const yAxis = svg.append("g").call(d3.axisLeft(y));
 
@@ -50,17 +64,18 @@ export function createLineChart(data) {
 
   // Use a single color (subtle shade of red) for all lines
   const lineColor = "#d66a6a"; // A less vibrant shade of red
+  const highlightColor = "#ffa500"; // A bright orange for the hover highlight
 
   // Function to draw lines
   function drawLines(filteredData, xScale, xDomain) {
     svg.selectAll(".line").remove();
 
     states.forEach(state => {
-      const stateData = xDomain.map(xValue => ({
-        xValue: xValue,
-        count: filteredData.get(state).get(xValue)?.length || 0,
-        injured: filteredData.get(state).get(xValue)?.reduce((sum, d) => sum + d.injured, 0) || 0,
-        killed: filteredData.get(state).get(xValue)?.reduce((sum, d) => sum + d.killed, 0) || 0
+      const stateData = xDomain.map(month => ({
+        month: month,
+        count: filteredData.get(state).get(month)?.length || 0,
+        injured: filteredData.get(state).get(month)?.reduce((sum, d) => sum + d.injured, 0) || 0,
+        killed: filteredData.get(state).get(month)?.reduce((sum, d) => sum + d.killed, 0) || 0
       }));
 
       const line = svg.append("path")
@@ -70,13 +85,13 @@ export function createLineChart(data) {
         .attr("stroke", lineColor) // Apply the subtle red color to all lines
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
-          .x(d => xScale(d.xValue))
+          .x(d => x(d.month))
           .y(d => y(d.count))
         );
 
-      // Tooltip events
+      // Tooltip and hover events with better highlight color
       line.on("mouseover", function(event, d) {
-        d3.select(this).attr("stroke-width", 3);
+        d3.select(this).attr("stroke", highlightColor).attr("stroke-width", 3); // Highlight with a different color
         tooltip.style("opacity", 1);
       })
       .on("mousemove", function(event, d) {
@@ -86,20 +101,20 @@ export function createLineChart(data) {
           .style("top", (yPos) + "px");
       })
       .on("mouseout", function() {
-        d3.select(this).attr("stroke-width", 1.5);
+        d3.select(this).attr("stroke", lineColor).attr("stroke-width", 1.5); // Revert to original color on mouse out
         tooltip.style("opacity", 0);
       });
     });
   }
 
-  drawLines(nestedData, x, years);
+  drawLines(nestedData, x, months);
 
   // Labels and reset button
   svg.append("text")
     .attr("text-anchor", "end")
     .attr("x", width)
     .attr("y", height + margin.top + 20)
-    .text("Year");
+    .text("Month");
 
   svg.append("text")
     .attr("text-anchor", "end")
@@ -108,24 +123,9 @@ export function createLineChart(data) {
     .attr("x", -margin.top)
     .text("Number of Incidents");
 
-  // Click on year to update the state and filter by months
-  xAxis.selectAll("text").style("cursor", "pointer")
-    .on("click", function(event, year) {
-      const filteredData = d3.group(data.filter(d => d.year === year), d => d.state, d => d.month);
-      const months = Array.from(new Set(data.filter(d => d.year === year).map(d => d.month))).sort((a, b) => a - b);
-
-      const xMonth = d3.scalePoint().domain(months).range([0, width]);
-      xAxis.call(d3.axisBottom(xMonth).tickFormat(d => d3.timeFormat("%B")(new Date(2000, d - 1, 1))));
-      y.domain([0, d3.max(states, state => d3.max(months, month => filteredData.get(state).get(month)?.length || 0))]);
-      yAxis.transition().duration(1000).call(d3.axisLeft(y));
-
-      drawLines(filteredData, xMonth, months);
-      d3.select("#resetButton").style("display", "block");
-    });
-
-  // Reset button
+  // Reset button to restore the full-year view
   d3.select(".LineChart").append("button").attr("id", "resetButton").text("Reset")
     .style("display", "none").on("click", function() {
-      createLineChart(data); // Reset chart to full-year view
+      createLineChart(data); // Reset chart to show all data again
     });
 }
