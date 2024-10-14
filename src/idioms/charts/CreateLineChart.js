@@ -91,6 +91,7 @@ export function createLineChart(data) {
 
     states.forEach(state => {
       const stateData = xDomain.map(month => ({
+        state: state,
         month: month,
         count: filteredData.get(state).get(month)?.length || 0,
         injured: filteredData.get(state).get(month)?.reduce((sum, d) => sum + d.injured, 0) || 0,
@@ -135,4 +136,18 @@ export function createLineChart(data) {
   }
 
   drawLines(nestedData, x, months);
+
+  window.addEventListener('highlightState', (event) => {
+    const { state } = event.detail;
+    d3.selectAll(".line")
+      .filter(function(d) {
+        // Assuming each line's data has a state property
+        return d[0].state === state;
+      })
+      .attr("stroke", highlightColor)
+      .attr("stroke-width", 3);
+  });
+
+  window.addEventListener('removeHighlightState', (event) => {
+  });
 }
