@@ -120,4 +120,26 @@ export function createScatterPlot(data) {
     .style("display", "none").on("click", function() {
       createScatterPlot(data); // Reset chart to show all data again
     });
+
+  // Calculate the linear regression line
+  const xMean = d3.mean(scatterData, d => d.total_killed);
+  const yMean = d3.mean(scatterData, d => d.total_injured);
+  const numerator = d3.sum(scatterData, d => (d.total_killed - xMean) * (d.total_injured - yMean));
+  const denominator = d3.sum(scatterData, d => Math.pow(d.total_killed - xMean, 2));
+  const slope = numerator / denominator;
+  const intercept = yMean - slope * xMean;
+
+  // Define the line function
+  const line = d3.line()
+    .x(d => x(d.total_killed))
+    .y(d => y(slope * d.total_killed + intercept));
+
+  // Draw the regression line
+  svg.append("path")
+    .datum(scatterData)
+    .attr("class", "regression-line")
+    .attr("d", line)
+    .attr("stroke", "gray")
+    .attr("stroke-width", 2)
+    .attr("fill", "none");
 }
