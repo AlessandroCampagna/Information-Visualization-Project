@@ -1,4 +1,4 @@
-import * as d3 from 'd3';
+import * as d3 from "d3";
 
 export function createLineChart(data) {
   // Clear any existing SVG elements
@@ -97,6 +97,10 @@ export function createLineChart(data) {
       line.on("mouseover", function(event, d) {
         d3.select(this).attr("stroke", highlightColor).attr("stroke-width", 3); // Highlight with a different color
         tooltip.style("opacity", 1);
+
+        // Dispatch custom event
+        const highlightEvent = new CustomEvent('highlightState', { detail: { state } });
+        window.dispatchEvent(highlightEvent);
       })
       .on("mousemove", function(event, d) {
         const [xPos, yPos] = d3.pointer(event);
@@ -107,29 +111,13 @@ export function createLineChart(data) {
       .on("mouseout", function() {
         d3.select(this).attr("stroke", lineColor).attr("stroke-width", 1.5); // Revert to original color on mouse out
         tooltip.style("opacity", 0);
+
+        // Dispatch custom event to remove highlight
+        const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state } });
+        window.dispatchEvent(removeHighlightEvent);
       });
     });
   }
 
   drawLines(nestedData, x, months);
-
-  // Labels and reset button
-  svg.append("text")
-    .attr("text-anchor", "end")
-    .attr("x", width)
-    .attr("y", height + margin.top + 20)
-    .text("Month");
-
-  svg.append("text")
-    .attr("text-anchor", "end")
-    .attr("transform", "rotate(-90)")
-    .attr("y", -margin.left + 20)
-    .attr("x", -margin.top)
-    .text("Number of Incidents");
-
-  // Reset button to restore the full-year view
-  d3.select(".LineChart").append("button").attr("id", "resetButton").text("Reset")
-    .style("display", "none").on("click", function() {
-      createLineChart(data); // Reset chart to show all data again
-    });
 }

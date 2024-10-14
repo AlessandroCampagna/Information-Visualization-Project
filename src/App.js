@@ -9,15 +9,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <aside className="sidebar">
-        <h2>Gun Violence</h2>
-        <h3>United States</h3>
-        <ul>
-          <li>Dashboard</li>
-          <li>Settings</li>
-          <li>Profile</li>
-        </ul>
-      </aside>
+
       <main className="dashboard">
         <div className="container large LineChart"></div>
         <div className="container small">Hexagon Map</div>
