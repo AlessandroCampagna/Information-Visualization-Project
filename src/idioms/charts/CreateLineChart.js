@@ -149,5 +149,8 @@ export function createLineChart(data) {
   });
 
   window.addEventListener('removeHighlightState', (event) => {
+    d3.selectAll(".line")
+      .attr("stroke", lineColor)
+      .attr("stroke-width", 1.5);
   });
 }
