@@ -54,6 +54,21 @@ export function createLineChart(data) {
 
   const yAxis = svg.append("g").call(d3.axisLeft(y));
 
+  // Add x-axis label
+  svg.append("text")
+    .attr("class", "x-axis-label")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height + margin.bottom - 10)
+
+  // Add y-axis label
+  svg.append("text")
+    .attr("class", "y-axis-label")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left + 20)
+    .attr("x", -margin.top)
+
   // Tooltip setup
   const tooltip = d3.select(".LineChart")
     .append("div")

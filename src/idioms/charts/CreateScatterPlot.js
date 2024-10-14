@@ -73,15 +73,9 @@ export function createScatterPlot(data) {
     .on("mousemove", function(event, d) {
       // Update tooltip HTML content
       tooltip.html(`State: ${d.state}<br>Year: ${d.year}<br>Total Injuries: ${d.total_injured}<br>Total Kills: ${d.total_killed}`);
-      // Measure the tooltip size
-      const tooltipWidth = tooltip.node().getBoundingClientRect().width; // Get the tooltip width
-      const tooltipHeight = tooltip.node().getBoundingClientRect().height; // Get the tooltip height
-      // Calculate the tooltip position to center it in the viewport
-      const tooltipX = (window.innerWidth - tooltipWidth) / 2; // Center horizontally
-      const tooltipY = (window.innerHeight - tooltipHeight) / 2; // Center vertically
-      // Update tooltip position
-      tooltip.style("left", tooltipX +100+ "px")
-          .style("top", tooltipY + "px");
+      // Update tooltip position to follow the mouse
+      tooltip.style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
   })
     .on("mouseout", function() {
       d3.select(this).attr("fill", dotColor).attr("r", 5); // Revert to original color and size
