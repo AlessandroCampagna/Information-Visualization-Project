@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { createLineChart } from './charts/CreateLineChart';
 import { createScatterPlot } from './charts/CreateScatterPlot';
+import { createHexabinMap } from './charts/CreateHexabinMap';
 // Import other chart creation functions here...
 
 export function createCharts() {
@@ -12,6 +13,7 @@ export function createCharts() {
     // Create the charts
     createLineChart(filteredData);
     createScatterPlot(filteredData);
+    createHexabinMap(filteredData);
 
   }).catch(error => {
     console.error("Error loading the dataset:", error);

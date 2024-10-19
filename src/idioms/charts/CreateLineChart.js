@@ -131,6 +131,18 @@ export function createLineChart(data) {
         // Dispatch custom event to remove highlight
         const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state } });
         window.dispatchEvent(removeHighlightEvent);
+      })
+      .on("click", function() {
+        // Toggle state selection
+        if (selectedState === state) {
+          // If state is already selected, reset selection (show all)
+          selectedState = null;
+        } else {
+          // Set the selected state
+          selectedState = state;
+        }
+        // Filter data based on the selected state
+        updateChart();
       });
     });
   }

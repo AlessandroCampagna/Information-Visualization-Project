@@ -11,9 +11,7 @@ function App() {
     <div className="app-container">
       <main className="dashboard">
         <div className="container large LineChart"></div>
-        <div className="container small">
-          <img src={process.env.PUBLIC_URL + "/map.png"} alt="Hexagon Map" className="hexagon-map" />
-        </div>
+        <div className="container small HexabinMap"></div>
         <div className="container small ScatterPlot"></div>
       </main>
     </div>
