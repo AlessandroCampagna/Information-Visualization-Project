@@ -132,6 +132,11 @@ export function createHexabinMap(data) {
         d3.select(this).attr("fill", colorScale(incidentCount)); // Revert color on mouse out
         const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { stateAbbreviation } });
         window.dispatchEvent(removeHighlightEvent);
+      })
+      .on("click", function(event, d) {
+        const stateAbbreviation = d.properties.iso3166_2;
+        const filterEvent = new CustomEvent('filterState', { detail: { stateAbbreviation } });
+        window.dispatchEvent(filterEvent);
       });
 
     // Add the labels

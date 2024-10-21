@@ -171,6 +171,12 @@ export function createScatterPlot(data) {
       .attr("r", 7);
   });
 
+  window.addEventListener('filterState', (event) => {
+    const { stateAbbreviation } = event.detail;
+    dots.filter(d => stateNameToAbbreviation[d.state] !== stateAbbreviation)
+      .attr("r", 0);
+  });
+
   window.addEventListener('removeHighlightState', (event) => {
     const { stateAbbreviation } = event.detail;
     dots.filter(d => stateNameToAbbreviation[d.state] === stateAbbreviation)

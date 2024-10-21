@@ -204,6 +204,16 @@ export function createLineChart(data) {
       .attr("stroke-width", 3);
   });
 
+  window.addEventListener('filterState', (event) => {
+    const { stateAbbreviation } = event.detail;
+    d3.selectAll(".line")
+      .filter(function(d) {
+        // Assuming each line's data has a state property
+        return stateNameToAbbreviation[d[0].state] !== stateAbbreviation;
+      })
+      .attr("stroke-width", 0);
+  });
+
   window.addEventListener('removeHighlightState', (event) => {
     d3.selectAll(".line")
       .attr("stroke", lineColor)
