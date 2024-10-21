@@ -79,7 +79,8 @@ export function createLineChart(data) {
     .style("border-width", "1px")
     .style("border-radius", "5px")
     .style("padding", "10px")
-    .style("position", "absolute");
+    .style("position", "absolute")
+    .style("pointer-events", "none"); // Ensure the tooltip doesn't block interactions when hidden
 
   // Use a single color (subtle shade of red) for all lines
   const lineColor = "#d66a6a"; // A less vibrant shade of red
@@ -112,7 +113,7 @@ export function createLineChart(data) {
       // Tooltip and hover events with better highlight color
       line.on("mouseover", function(event, d) {
         d3.select(this).attr("stroke", highlightColor).attr("stroke-width", 3); // Highlight with a different color
-        tooltip.style("opacity", 1);
+        tooltip.style("opacity", 1).style("pointer-events", "auto"); // Enable pointer-events when visible;
 
         // Dispatch custom event
         const highlightEvent = new CustomEvent('highlightState', { detail: { state } });
@@ -126,23 +127,11 @@ export function createLineChart(data) {
       })
       .on("mouseout", function() {
         d3.select(this).attr("stroke", lineColor).attr("stroke-width", 1.5); // Revert to original color on mouse out
-        tooltip.style("opacity", 0);
+        tooltip.style("opacity", 0).style("pointer-events", "none"); // Disable pointer-events when hidden;
 
         // Dispatch custom event to remove highlight
         const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state } });
         window.dispatchEvent(removeHighlightEvent);
-      })
-      .on("click", function() {
-        // Toggle state selection
-        if (selectedState === state) {
-          // If state is already selected, reset selection (show all)
-          selectedState = null;
-        } else {
-          // Set the selected state
-          selectedState = state;
-        }
-        // Filter data based on the selected state
-        updateChart();
       });
     });
   }

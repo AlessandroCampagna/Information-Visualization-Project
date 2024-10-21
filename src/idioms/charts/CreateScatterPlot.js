@@ -46,15 +46,16 @@ export function createScatterPlot(data) {
 
   // Tooltip setup
   const tooltip = d3.select(".ScatterPlot")
-    .append("div")
-    .style("opacity", 0)
-    .attr("class", "tooltip")
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "1px")
-    .style("border-radius", "5px")
-    .style("padding", "10px")
-    .style("position", "absolute");
+  .append("div")
+  .style("opacity", 0)
+  .attr("class", "tooltip")
+  .style("background-color", "white")
+  .style("border", "solid")
+  .style("border-width", "1px")
+  .style("border-radius", "5px")
+  .style("padding", "10px")
+  .style("position", "absolute")
+  .style("pointer-events", "none"); // Ensure the tooltip doesn't block interactions when hidden
 
   const dotColor = "#d66a6a";  // Color of the scatter plot dots
   const highlightColor = "#ffa500"; // Highlight color for the hover event
@@ -71,8 +72,8 @@ export function createScatterPlot(data) {
     .attr("fill", dotColor)
     .on("mouseover", function(event, d) {
       d3.select(this).attr("fill", highlightColor).attr("r", 7); // Highlight the dot on hover
-      tooltip.style("opacity", 1);
-
+      tooltip.style("opacity", 1).style("pointer-events", "auto"); // Enable pointer-events when visible
+  
       // Dispatch custom event to highlight the same state in the line chart
       const highlightEvent = new CustomEvent('highlightState', { detail: { state: d.state } });
       window.dispatchEvent(highlightEvent);
@@ -86,8 +87,8 @@ export function createScatterPlot(data) {
     })
     .on("mouseout", function(event, d) {
       d3.select(this).attr("fill", dotColor).attr("r", 5); // Revert to original color and size
-      tooltip.style("opacity", 0);
-
+      tooltip.style("opacity", 0).style("pointer-events", "none"); // Disable pointer-events when hidden
+  
       // Dispatch custom event to remove highlight from the line chart
       const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state: d.state } });
       window.dispatchEvent(removeHighlightEvent);
