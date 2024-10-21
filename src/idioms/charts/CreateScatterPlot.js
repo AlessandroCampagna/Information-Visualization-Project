@@ -50,7 +50,8 @@ const stateNameToAbbreviation = {
   "Washington": "WA",
   "West Virginia": "WV",
   "Wisconsin": "WI",
-  "Wyoming": "WY"
+  "Wyoming": "WY",
+  "District of Columbia": "DC"
 };
 
 export function createScatterPlot(data) {
