@@ -208,4 +208,17 @@ export function createLineChart(data) {
       .attr("stroke", lineColor)
       .attr("stroke-width", 1.5);
   });
+
+  svg.append("text")
+    .attr("class", "y-axis-label")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left + 20)
+    .attr("x", -margin.top + 20)
+    .text("Number of Incidents");
+
+  // Add legend
+  const legend = svg.append("g")
+    .attr("class", "legend")
+    .attr("transform", `translate(${width + 20}, 0)`); // Position legend to the right of the chart
 }
