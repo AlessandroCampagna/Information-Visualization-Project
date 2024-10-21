@@ -146,6 +146,26 @@ export function createHexabinMap(data) {
       .attr("alignment-baseline", "central")
       .style("font-size", 11)
       .style("fill", "white");
+  
+  // Listen for custom events to highlight hexbin map states
+  window.addEventListener('highlightState', (event) => {
+    const { state } = event.detail;
+    const stateAbbreviation = stateNameToAbbreviation[state];
+    svg.selectAll("path")
+      .filter(d => d.properties.iso3166_2 === stateAbbreviation)
+      .attr("fill", highlightColor);
+  });
+
+  window.addEventListener('removeHighlightState', (event) => {
+    const { state } = event.detail;
+    const stateAbbreviation = stateNameToAbbreviation[state];
+    svg.selectAll("path")
+      .filter(d => d.properties.iso3166_2 === stateAbbreviation)
+      .attr("fill", d => {
+        const incidentCount = stateIncidentCounts.get(state) || 0;
+        return colorScale(incidentCount);
+      });
+  });
 
   }).catch(function(error) {
     console.error("Error loading GeoJSON data:", error);
