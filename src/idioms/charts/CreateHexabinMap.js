@@ -53,7 +53,7 @@ const stateNameToAbbreviation = {
   "Wyoming": "WY"
 };
 
-export function createHexabinMap() {
+export function createHexabinMap(data) {
   // Select the container for the hexbin map
   const container = d3.select(".HexabinMap");
 
@@ -89,21 +89,33 @@ export function createHexabinMap() {
   const path = d3.geoPath()
     .projection(projection);
 
+  // Calculate the total number of incidents for each state
+  const stateIncidentCounts = d3.rollup(data, v => v.length, d => d.state);
+
+  // Create a color scale
+  const colorScale = d3.scaleSequential(d3.interpolateReds)
+    .domain([0, d3.max(stateIncidentCounts.values())]);
+
   // Load external data and boot
-  d3.json(process.env.PUBLIC_URL + "/data/us_states_hexgrid.geojson.json").then(function(data) {
-    if (!data) {
+  d3.json(process.env.PUBLIC_URL + "/data/us_states_hexgrid.geojson.json").then(function(geoData) {
+    if (!geoData) {
       console.error("Failed to load GeoJSON data.");
       return;
     }
 
-    const highlightColor = "#ffa500"; // A bright orange for the hover highlight
+    const highlightColor = "#ffcc00"; // A bright orange for the hover highlight
 
     // Draw the map
     svg.append("g")
       .selectAll("path")
-      .data(data.features)
+      .data(geoData.features)
       .join("path")
-      .attr("fill", "#69a2a2")
+      .attr("fill", d => {
+        const stateAbbreviation = d.properties.iso3166_2;
+        const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+        const incidentCount = stateIncidentCounts.get(stateName) || 0;
+        return colorScale(incidentCount);
+      })
       .attr("d", path)
       .attr("stroke", "white")
       .on("mouseover", function(event, d) {
@@ -113,8 +125,10 @@ export function createHexabinMap() {
         window.dispatchEvent(highlightEvent);
       })
       .on("mouseout", function(event, d) {
-        d3.select(this).attr("fill", "#69a2a2"); // Revert color on mouse out
         const stateAbbreviation = d.properties.iso3166_2;
+        const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+        const incidentCount = stateIncidentCounts.get(stateName) || 0;
+        d3.select(this).attr("fill", colorScale(incidentCount)); // Revert color on mouse out
         const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { stateAbbreviation } });
         window.dispatchEvent(removeHighlightEvent);
       });
@@ -122,7 +136,7 @@ export function createHexabinMap() {
     // Add the labels
     svg.append("g")
       .selectAll("labels")
-      .data(data.features)
+      .data(geoData.features)
       .join("text")
       .attr("x", function(d) { return path.centroid(d)[0]; })
       .attr("y", function(d) { return path.centroid(d)[1]; })

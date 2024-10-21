@@ -137,7 +137,7 @@ export function createLineChart(data) {
 
   // Use a single color (subtle shade of red) for all lines
   const lineColor = "#d66a6a"; // A less vibrant shade of red
-  const highlightColor = "#ffa500"; // A bright orange for the hover highlight
+  const highlightColor = "#ffcc00"; // A bright orange for the hover highlight
 
   // Function to draw lines
   function drawLines(filteredData, xScale, xDomain) {

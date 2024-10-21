@@ -111,7 +111,7 @@ export function createScatterPlot(data) {
   .style("pointer-events", "none"); // Ensure the tooltip doesn't block interactions when hidden
 
   const dotColor = "#d66a6a";  // Color of the scatter plot dots
-  const highlightColor = "#ffa500"; // Highlight color for the hover event
+  const highlightColor = "#ffcc00"; // Highlight color for the hover event
 
   // Draw scatter plot points
   const dots = svg.selectAll(".dot")
