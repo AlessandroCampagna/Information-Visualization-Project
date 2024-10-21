@@ -1,7 +1,59 @@
 import * as d3 from "d3";
-import { hexbin as d3Hexbin } from "d3-hexbin";
 
-export function createHexabinMap(data) {
+const stateNameToAbbreviation = {
+  "Alabama": "AL",
+  "Alaska": "AK",
+  "Arizona": "AZ",
+  "Arkansas": "AR",
+  "California": "CA",
+  "Colorado": "CO",
+  "Connecticut": "CT",
+  "Delaware": "DE",
+  "Florida": "FL",
+  "Georgia": "GA",
+  "Hawaii": "HI",
+  "Idaho": "ID",
+  "Illinois": "IL",
+  "Indiana": "IN",
+  "Iowa": "IA",
+  "Kansas": "KS",
+  "Kentucky": "KY",
+  "Louisiana": "LA",
+  "Maine": "ME",
+  "Maryland": "MD",
+  "Massachusetts": "MA",
+  "Michigan": "MI",
+  "Minnesota": "MN",
+  "Mississippi": "MS",
+  "Missouri": "MO",
+  "Montana": "MT",
+  "Nebraska": "NE",
+  "Nevada": "NV",
+  "New Hampshire": "NH",
+  "New Jersey": "NJ",
+  "New Mexico": "NM",
+  "New York": "NY",
+  "North Carolina": "NC",
+  "North Dakota": "ND",
+  "Ohio": "OH",
+  "Oklahoma": "OK",
+  "Oregon": "OR",
+  "Pennsylvania": "PA",
+  "Rhode Island": "RI",
+  "South Carolina": "SC",
+  "South Dakota": "SD",
+  "Tennessee": "TN",
+  "Texas": "TX",
+  "Utah": "UT",
+  "Vermont": "VT",
+  "Virginia": "VA",
+  "Washington": "WA",
+  "West Virginia": "WV",
+  "Wisconsin": "WI",
+  "Wyoming": "WY"
+};
+
+export function createHexabinMap() {
   // Select the container for the hexbin map
   const container = d3.select(".HexabinMap");
 
@@ -44,6 +96,8 @@ export function createHexabinMap(data) {
       return;
     }
 
+    const highlightColor = "#ffa500"; // A bright orange for the hover highlight
+
     // Draw the map
     svg.append("g")
       .selectAll("path")
@@ -53,10 +107,16 @@ export function createHexabinMap(data) {
       .attr("d", path)
       .attr("stroke", "white")
       .on("mouseover", function(event, d) {
-        d3.select(this).attr("fill", "#ffa500"); // Change color on hover
+        d3.select(this).attr("fill", highlightColor); // Change color on hover
+        const stateAbbreviation = d.properties.iso3166_2;
+        const highlightEvent = new CustomEvent('highlightState', { detail: { stateAbbreviation } });
+        window.dispatchEvent(highlightEvent);
       })
       .on("mouseout", function(event, d) {
         d3.select(this).attr("fill", "#69a2a2"); // Revert color on mouse out
+        const stateAbbreviation = d.properties.iso3166_2;
+        const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { stateAbbreviation } });
+        window.dispatchEvent(removeHighlightEvent);
       });
 
     // Add the labels
@@ -71,6 +131,7 @@ export function createHexabinMap(data) {
       .attr("alignment-baseline", "central")
       .style("font-size", 11)
       .style("fill", "white");
+
   }).catch(function(error) {
     console.error("Error loading GeoJSON data:", error);
   });
