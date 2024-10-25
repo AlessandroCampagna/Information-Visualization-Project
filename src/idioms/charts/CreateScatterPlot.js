@@ -48,6 +48,57 @@ function calculateRegressionLine(scatterData, x, y) {
   return line;
 }
 
+function createPoints(svg, scatterData, x, y) {
+  // Tooltip setup
+  const tooltip = d3.select(".ScatterPlot")
+  .append("div")
+  .style("opacity", 0)
+  .attr("class", "tooltip")
+  .style("background-color", "white")
+  .style("border", "solid")
+  .style("border-width", "1px")
+  .style("border-radius", "5px")
+  .style("padding", "10px")
+  .style("position", "absolute")
+  .style("pointer-events", "none"); // Ensure the tooltip doesn't block interactions when hidden
+  
+  // Draw scatter plot points
+  const dots = svg.selectAll(".dot")
+    .data(scatterData) // Bind the data
+    .enter()
+    .append("circle")
+    .attr("class", "dot")
+    .attr("cx", d => x(d.total_killed)) // X-axis for total kills
+    .attr("cy", d => y(d.total_injured)) // Y-axis for total injuries
+    .attr("r", 5) // Radius of the scatter plot dots
+    .attr("fill", color.primary)
+    .on("mouseover", function(event, d) {
+      d3.select(this).attr("fill", color.highlight).attr("r", 7); // Highlight the dot on hover
+      tooltip.style("opacity", 1).style("pointer-events", "auto"); // Enable pointer-events when visible
+    
+      // Dispatch custom event to highlight the same state in the line chart
+      const highlightEvent = new CustomEvent('highlightState', { detail: { state: d.state } });
+      window.dispatchEvent(highlightEvent);
+    })
+    .on("mousemove", function(event, d) {
+      // Update tooltip HTML content
+      tooltip.html(`State: ${d.state}<br>Year: ${d.year}<br>Total Injuries: ${d.total_injured}<br>Total Kills: ${d.total_killed}`);
+      // Update tooltip position to follow the mouse
+      tooltip.style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+    })
+    .on("mouseout", function(event, d) {
+      d3.select(this).attr("fill", color.primary).attr("r", 5); // Revert to original color and size
+      tooltip.style("opacity", 0).style("pointer-events", "none"); // Disable pointer-events when hidden
+  
+      // Dispatch custom event to remove highlight from the line chart
+      const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state: d.state } });
+      window.dispatchEvent(removeHighlightEvent);
+    });
+
+    return dots;
+}
+
 export function createScatterPlot(data) {
   // Clear any existing SVG elements
   d3.select(".ScatterPlot").selectAll("*").remove();
@@ -92,54 +143,6 @@ export function createScatterPlot(data) {
 
   svg.append("g").call(d3.axisLeft(y)); // Y-axis for number of injuries
 
-  // Tooltip setup
-  const tooltip = d3.select(".ScatterPlot")
-  .append("div")
-  .style("opacity", 0)
-  .attr("class", "tooltip")
-  .style("background-color", "white")
-  .style("border", "solid")
-  .style("border-width", "1px")
-  .style("border-radius", "5px")
-  .style("padding", "10px")
-  .style("position", "absolute")
-  .style("pointer-events", "none"); // Ensure the tooltip doesn't block interactions when hidden
-
-  // Draw scatter plot points
-  const dots = svg.selectAll(".dot")
-    .data(scatterData) // Bind the data
-    .enter()
-    .append("circle")
-    .attr("class", "dot")
-    .attr("cx", d => x(d.total_killed)) // X-axis for total kills
-    .attr("cy", d => y(d.total_injured)) // Y-axis for total injuries
-    .attr("r", 5) // Radius of the scatter plot dots
-    .attr("fill", color.primary)
-    .on("mouseover", function(event, d) {
-      d3.select(this).attr("fill", color.highlight).attr("r", 7); // Highlight the dot on hover
-      tooltip.style("opacity", 1).style("pointer-events", "auto"); // Enable pointer-events when visible
-  
-      // Dispatch custom event to highlight the same state in the line chart
-      const highlightEvent = new CustomEvent('highlightState', { detail: { state: d.state } });
-      window.dispatchEvent(highlightEvent);
-    })
-    .on("mousemove", function(event, d) {
-      // Update tooltip HTML content
-      tooltip.html(`State: ${d.state}<br>Year: ${d.year}<br>Total Injuries: ${d.total_injured}<br>Total Kills: ${d.total_killed}`);
-      // Update tooltip position to follow the mouse
-      tooltip.style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 28) + "px");
-    })
-    .on("mouseout", function(event, d) {
-      d3.select(this).attr("fill", color.primary).attr("r", 5); // Revert to original color and size
-      tooltip.style("opacity", 0).style("pointer-events", "none"); // Disable pointer-events when hidden
-  
-      // Dispatch custom event to remove highlight from the line chart
-      const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state: d.state } });
-      window.dispatchEvent(removeHighlightEvent);
-    });
-
-
   // Labels for x and y axes
   svg.append("text")
     .attr("text-anchor", "end")
@@ -154,6 +157,11 @@ export function createScatterPlot(data) {
     .attr("x", -margin.top)
     .text("Number of Injuries"); // Y-axis label
 
+
+  const dots = createPoints(svg, scatterData, x, y);
+  
+  addEventListeners(dots);
+
   const line = calculateRegressionLine(scatterData, x, y);
 
   // Draw the regression line
@@ -164,6 +172,4 @@ export function createScatterPlot(data) {
     .attr("stroke", "gray")
     .attr("stroke-width", 2)
     .attr("fill", "none");
-
-  addEventListeners(dots);
 }
