@@ -1,6 +1,6 @@
 import * as d3 from "d3";
-import { stateNameToAbbreviation } from "./MapStates";
-import * as color from  "./Colors";
+import { stateNameToAbbreviation } from "../channels/MapStates";
+import * as color from  "../channels/Colors";
 
 function addEventListeners() {
   window.addEventListener('highlightState', (event) => {

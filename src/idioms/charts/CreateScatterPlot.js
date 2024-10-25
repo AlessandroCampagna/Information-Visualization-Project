@@ -1,6 +1,6 @@
 import * as d3 from "d3";
-import { stateNameToAbbreviation } from "./MapStates";
-import * as color from  "./Colors";
+import { stateNameToAbbreviation } from "../channels/MapStates";
+import * as color from  "../channels/Colors";
 
 function addEventListeners(dots) {
   window.addEventListener('highlightState', (event) => {
@@ -159,10 +159,9 @@ export function createScatterPlot(data) {
 
 
   const dots = createPoints(svg, scatterData, x, y);
+  const line = calculateRegressionLine(scatterData, x, y);
   
   addEventListeners(dots);
-
-  const line = calculateRegressionLine(scatterData, x, y);
 
   // Draw the regression line
   svg.append("path")
