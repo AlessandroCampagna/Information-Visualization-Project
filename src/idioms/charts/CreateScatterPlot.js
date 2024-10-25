@@ -104,8 +104,7 @@ export function createScatterPlot(data) {
   });
 
   window.addEventListener('removeHighlightState', (event) => {
-    const { state } = event.detail;
-    dots.filter(d => d.state === state)
+    dots
       .attr("fill", dotColor)
       .attr("r", 5);
   });
@@ -122,13 +121,6 @@ export function createScatterPlot(data) {
     const { stateAbbreviation } = event.detail;
     dots.filter(d => stateNameToAbbreviation[d.state] !== stateAbbreviation)
       .attr("r", 0);
-  });
-
-  window.addEventListener('removeHighlightState', (event) => {
-    const { stateAbbreviation } = event.detail;
-    dots.filter(d => stateNameToAbbreviation[d.state] === stateAbbreviation)
-      .attr("fill", dotColor)
-      .attr("r", 5);
   });
 
   // Labels for x and y axes
