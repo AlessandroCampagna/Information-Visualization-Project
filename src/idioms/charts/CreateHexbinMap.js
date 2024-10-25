@@ -1,5 +1,27 @@
 import * as d3 from "d3";
 import { stateNameToAbbreviation } from "./MapStates";
+import * as color from  "./Colors";
+
+function addEventListeners(svg, stateIncidentCounts, colorScale) {
+  window.addEventListener('highlightState', (event) => {
+    const { state } = event.detail;
+    const stateAbbreviation = stateNameToAbbreviation[state];
+    svg.selectAll("path")
+      .filter(d => d.properties.iso3166_2 === stateAbbreviation)
+      .attr("fill", color.highlight);
+  });
+
+  window.addEventListener('removeHighlightState', (event) => {
+    const { state } = event.detail;
+    const stateAbbreviation = stateNameToAbbreviation[state];
+    svg.selectAll("path")
+      .filter(d => d.properties.iso3166_2 === stateAbbreviation)
+      .attr("fill", d => {
+        const incidentCount = stateIncidentCounts.get(state) || 0;
+        return colorScale(incidentCount);
+      });
+  });
+}
 
 export function createHexbinMap(data) {
   // Select the container for the hexbin map
@@ -51,8 +73,6 @@ export function createHexbinMap(data) {
       return;
     }
 
-    const highlightColor = "#ffcc00"; // A bright orange for the hover highlight
-
     // Draw the map
     svg.append("g")
       .selectAll("path")
@@ -67,7 +87,7 @@ export function createHexbinMap(data) {
       .attr("d", path)
       .attr("stroke", "white")
       .on("mouseover", function(event, d) {
-        d3.select(this).attr("fill", highlightColor); // Change color on hover
+        d3.select(this).attr("fill", color.highlight); // Change color on hover
         const stateAbbreviation = d.properties.iso3166_2;
         const highlightEvent = new CustomEvent('highlightState', { detail: { stateAbbreviation } });
         window.dispatchEvent(highlightEvent);
@@ -98,28 +118,10 @@ export function createHexbinMap(data) {
       .attr("alignment-baseline", "central")
       .style("font-size", 11)
       .style("fill", "white");
-  
-  // Listen for custom events to highlight hexbin map states
-  window.addEventListener('highlightState', (event) => {
-    const { state } = event.detail;
-    const stateAbbreviation = stateNameToAbbreviation[state];
-    svg.selectAll("path")
-      .filter(d => d.properties.iso3166_2 === stateAbbreviation)
-      .attr("fill", highlightColor);
-  });
-
-  window.addEventListener('removeHighlightState', (event) => {
-    const { state } = event.detail;
-    const stateAbbreviation = stateNameToAbbreviation[state];
-    svg.selectAll("path")
-      .filter(d => d.properties.iso3166_2 === stateAbbreviation)
-      .attr("fill", d => {
-        const incidentCount = stateIncidentCounts.get(state) || 0;
-        return colorScale(incidentCount);
-      });
-  });
 
   }).catch(function(error) {
     console.error("Error loading GeoJSON data:", error);
   });
+
+  addEventListeners(svg, stateIncidentCounts, colorScale);
 }

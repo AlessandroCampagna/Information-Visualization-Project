@@ -1,5 +1,52 @@
 import * as d3 from "d3";
 import { stateNameToAbbreviation } from "./MapStates";
+import * as color from  "./Colors";
+
+function addEventListeners(dots) {
+  window.addEventListener('highlightState', (event) => {
+    const { state } = event.detail;
+    dots.filter(d => d.state === state)
+      .attr("fill", color.highlight)
+      .attr("r", 7);
+  });
+
+  window.addEventListener('removeHighlightState', (event) => {
+    dots
+      .attr("fill", color.primary)
+      .attr("r", 5);
+  });
+
+   // Listen for custom events to highlight scatter plot dots
+   window.addEventListener('highlightState', (event) => {
+    const { stateAbbreviation } = event.detail;
+    dots.filter(d => stateNameToAbbreviation[d.state] === stateAbbreviation)
+      .attr("fill", color.highlight)
+      .attr("r", 7);
+  });
+
+  window.addEventListener('filterState', (event) => {
+    const { stateAbbreviation } = event.detail;
+    dots.filter(d => stateNameToAbbreviation[d.state] !== stateAbbreviation)
+      .attr("r", 0);
+  });
+}
+
+function calculateRegressionLine(scatterData, x, y) {
+
+  const xMean = d3.mean(scatterData, d => d.total_killed);
+  const yMean = d3.mean(scatterData, d => d.total_injured);
+  const numerator = d3.sum(scatterData, d => (d.total_killed - xMean) * (d.total_injured - yMean));
+  const denominator = d3.sum(scatterData, d => Math.pow(d.total_killed - xMean, 2));
+  const slope = numerator / denominator;
+  const intercept = yMean - slope * xMean;
+
+  // Define the line function
+  const line = d3.line()
+    .x(d => x(d.total_killed))
+    .y(d => y(slope * d.total_killed + intercept));
+
+  return line;
+}
 
 export function createScatterPlot(data) {
   // Clear any existing SVG elements
@@ -58,9 +105,6 @@ export function createScatterPlot(data) {
   .style("position", "absolute")
   .style("pointer-events", "none"); // Ensure the tooltip doesn't block interactions when hidden
 
-  const dotColor = "#d66a6a";  // Color of the scatter plot dots
-  const highlightColor = "#ffcc00"; // Highlight color for the hover event
-
   // Draw scatter plot points
   const dots = svg.selectAll(".dot")
     .data(scatterData) // Bind the data
@@ -70,9 +114,9 @@ export function createScatterPlot(data) {
     .attr("cx", d => x(d.total_killed)) // X-axis for total kills
     .attr("cy", d => y(d.total_injured)) // Y-axis for total injuries
     .attr("r", 5) // Radius of the scatter plot dots
-    .attr("fill", dotColor)
+    .attr("fill", color.primary)
     .on("mouseover", function(event, d) {
-      d3.select(this).attr("fill", highlightColor).attr("r", 7); // Highlight the dot on hover
+      d3.select(this).attr("fill", color.highlight).attr("r", 7); // Highlight the dot on hover
       tooltip.style("opacity", 1).style("pointer-events", "auto"); // Enable pointer-events when visible
   
       // Dispatch custom event to highlight the same state in the line chart
@@ -87,7 +131,7 @@ export function createScatterPlot(data) {
           .style("top", (event.pageY - 28) + "px");
     })
     .on("mouseout", function(event, d) {
-      d3.select(this).attr("fill", dotColor).attr("r", 5); // Revert to original color and size
+      d3.select(this).attr("fill", color.primary).attr("r", 5); // Revert to original color and size
       tooltip.style("opacity", 0).style("pointer-events", "none"); // Disable pointer-events when hidden
   
       // Dispatch custom event to remove highlight from the line chart
@@ -95,33 +139,6 @@ export function createScatterPlot(data) {
       window.dispatchEvent(removeHighlightEvent);
     });
 
-  // Listen for custom events to highlight scatter plot dots
-  window.addEventListener('highlightState', (event) => {
-    const { state } = event.detail;
-    dots.filter(d => d.state === state)
-      .attr("fill", highlightColor)
-      .attr("r", 7);
-  });
-
-  window.addEventListener('removeHighlightState', (event) => {
-    dots
-      .attr("fill", dotColor)
-      .attr("r", 5);
-  });
-
-   // Listen for custom events to highlight scatter plot dots
-   window.addEventListener('highlightState', (event) => {
-    const { stateAbbreviation } = event.detail;
-    dots.filter(d => stateNameToAbbreviation[d.state] === stateAbbreviation)
-      .attr("fill", highlightColor)
-      .attr("r", 7);
-  });
-
-  window.addEventListener('filterState', (event) => {
-    const { stateAbbreviation } = event.detail;
-    dots.filter(d => stateNameToAbbreviation[d.state] !== stateAbbreviation)
-      .attr("r", 0);
-  });
 
   // Labels for x and y axes
   svg.append("text")
@@ -137,18 +154,7 @@ export function createScatterPlot(data) {
     .attr("x", -margin.top)
     .text("Number of Injuries"); // Y-axis label
 
-  // Linear regression line calculation
-  const xMean = d3.mean(scatterData, d => d.total_killed);
-  const yMean = d3.mean(scatterData, d => d.total_injured);
-  const numerator = d3.sum(scatterData, d => (d.total_killed - xMean) * (d.total_injured - yMean));
-  const denominator = d3.sum(scatterData, d => Math.pow(d.total_killed - xMean, 2));
-  const slope = numerator / denominator;
-  const intercept = yMean - slope * xMean;
-
-  // Define the line function
-  const line = d3.line()
-    .x(d => x(d.total_killed))
-    .y(d => y(slope * d.total_killed + intercept));
+  const line = calculateRegressionLine(scatterData, x, y);
 
   // Draw the regression line
   svg.append("path")
@@ -158,4 +164,6 @@ export function createScatterPlot(data) {
     .attr("stroke", "gray")
     .attr("stroke-width", 2)
     .attr("fill", "none");
+
+  addEventListeners(dots);
 }
