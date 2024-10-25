@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { createLineChart } from './charts/CreateLineChart';
 import { createScatterPlot } from './charts/CreateScatterPlot';
-import { createHexabinMap } from './charts/CreateHexabinMap';
+import { createHexbinMap } from './charts/CreateHexbinMap';
 
 export function createCharts() {
   // Load the CSV data
@@ -9,7 +9,7 @@ export function createCharts() {
 
     createLineChart(data);
     createScatterPlot(data);
-    createHexabinMap(data);
+    createHexbinMap(data);
 
   }).catch(error => {
     console.error("Error loading the dataset:", error);

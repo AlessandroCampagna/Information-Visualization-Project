@@ -1,13 +1,13 @@
 import * as d3 from "d3";
 import { stateNameToAbbreviation } from "./MapStates";
 
-export function createHexabinMap(data) {
+export function createHexbinMap(data) {
   // Select the container for the hexbin map
-  const container = d3.select(".HexabinMap");
+  const container = d3.select(".HexbinMap");
 
   // Check if the container exists
   if (container.empty()) {
-    console.error("Container with class 'HexabinMap' not found.");
+    console.error("Container with class 'HexbinMap' not found.");
     return;
   }
 
