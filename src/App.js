@@ -11,7 +11,7 @@ function App() {
     <div className="app-container">
       <main className="dashboard">
         <div className="container large LineChart"></div>
-        <div className="container small HexabinMap"></div>
+        <div className="container small HexbinMap"></div>
         <div className="container small ScatterPlot"></div>
       </main>
     </div>

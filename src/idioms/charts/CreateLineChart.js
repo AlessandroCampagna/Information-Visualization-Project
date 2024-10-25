@@ -1,58 +1,5 @@
 import * as d3 from "d3";
-
-const stateNameToAbbreviation = {
-  "Alabama": "AL",
-  "Alaska": "AK",
-  "Arizona": "AZ",
-  "Arkansas": "AR",
-  "California": "CA",
-  "Colorado": "CO",
-  "Connecticut": "CT",
-  "Delaware": "DE",
-  "Florida": "FL",
-  "Georgia": "GA",
-  "Hawaii": "HI",
-  "Idaho": "ID",
-  "Illinois": "IL",
-  "Indiana": "IN",
-  "Iowa": "IA",
-  "Kansas": "KS",
-  "Kentucky": "KY",
-  "Louisiana": "LA",
-  "Maine": "ME",
-  "Maryland": "MD",
-  "Massachusetts": "MA",
-  "Michigan": "MI",
-  "Minnesota": "MN",
-  "Mississippi": "MS",
-  "Missouri": "MO",
-  "Montana": "MT",
-  "Nebraska": "NE",
-  "Nevada": "NV",
-  "New Hampshire": "NH",
-  "New Jersey": "NJ",
-  "New Mexico": "NM",
-  "New York": "NY",
-  "North Carolina": "NC",
-  "North Dakota": "ND",
-  "Ohio": "OH",
-  "Oklahoma": "OK",
-  "Oregon": "OR",
-  "Pennsylvania": "PA",
-  "Rhode Island": "RI",
-  "South Carolina": "SC",
-  "South Dakota": "SD",
-  "Tennessee": "TN",
-  "Texas": "TX",
-  "Utah": "UT",
-  "Vermont": "VT",
-  "Virginia": "VA",
-  "Washington": "WA",
-  "West Virginia": "WV",
-  "Wisconsin": "WI",
-  "Wyoming": "WY",
-  "District of Columbia": "DC"
-};
+import { stateNameToAbbreviation } from "./MapStates";
 
 export function createLineChart(data) {
   // Clear any existing SVG elements
@@ -86,9 +33,9 @@ export function createLineChart(data) {
   
   // Create x and y scales
   const x = d3.scalePoint()
-    .domain(months) // Use the month-year format as the domain
+    .domain(months)
     .range([0, width])
-    .padding(0.5); // Add some padding between ticks
+    .padding(0.5);
 
   const y = d3.scaleLinear()
     .domain([0, d3.max(states, state => d3.max(months, month => {
@@ -97,8 +44,7 @@ export function createLineChart(data) {
     }))])
     .range([height, 0]);
 
-  // Create x and y axes
-  const xAxis = svg.append("g")
+  svg.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x)) // Show month and year format
     .selectAll("text") // Select all text elements for custom formatting
@@ -106,16 +52,22 @@ export function createLineChart(data) {
     .attr("transform", "rotate(-45)") // Rotate for better visibility
     .style("font-size", "10px"); // Adjust font size if needed
 
-  const yAxis = svg.append("g").call(d3.axisLeft(y));
+  svg.append("g").call(d3.axisLeft(y));
 
-  // Add x-axis label
   svg.append("text")
     .attr("class", "x-axis-label")
     .attr("text-anchor", "end")
     .attr("x", width)
     .attr("y", height + margin.bottom - 10)
+  
+  svg.append("text")
+    .attr("class", "y-axis-label")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left + 20)
+    .attr("x", -margin.top + 20)
+    .text("Number of Incidents");
 
-  // Add y-axis label
   svg.append("text")
     .attr("class", "y-axis-label")
     .attr("text-anchor", "end")
@@ -220,16 +172,4 @@ export function createLineChart(data) {
       .attr("stroke-width", 1.5);
   });
 
-  svg.append("text")
-    .attr("class", "y-axis-label")
-    .attr("text-anchor", "end")
-    .attr("transform", "rotate(-90)")
-    .attr("y", -margin.left + 20)
-    .attr("x", -margin.top + 20)
-    .text("Number of Incidents");
-
-  // Add legend
-  const legend = svg.append("g")
-    .attr("class", "legend")
-    .attr("transform", `translate(${width + 20}, 0)`); // Position legend to the right of the chart
 }

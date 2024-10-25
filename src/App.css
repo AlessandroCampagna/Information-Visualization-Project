@@ -50,7 +50,7 @@ body, html, #root {
 /* Top container spans both columns */
 .container.large {
   grid-column: span 2;
-  background-color: #e0e0e0;
+  background-color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
