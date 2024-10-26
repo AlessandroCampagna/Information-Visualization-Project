@@ -117,7 +117,8 @@ export function createHexbinMap(data) {
       .attr("text-anchor", "middle")
       .attr("alignment-baseline", "central")
       .style("font-size", 11)
-      .style("fill", "black");
+      .style("fill", "black")
+      .style("pointer-events", "none"); // Make labels hollow, allowing selection of elements underneath
 
   }).catch(function(error) {
     console.error("Error loading GeoJSON data:", error);
