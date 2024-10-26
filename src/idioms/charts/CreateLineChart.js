@@ -13,7 +13,8 @@ function handleHighlightState(event) {
   d3.selectAll(".line")
     .filter(d => d[0].state === state || stateNameToAbbreviation[d[0].state] === stateAbbreviation)
     .attr("stroke", color.highlight)
-    .attr("stroke-width", 3);
+    .attr("stroke-width", 3)
+    .raise();
 }
 
 function handleFilterState(event) {
@@ -56,7 +57,7 @@ function createLine(svg, stateData, x, y, state, tooltip) {
     );
 
   line.on("mouseover", function(event) {
-    d3.select(this).attr("stroke", color.highlight).attr("stroke-width", 3);
+    d3.select(this).attr("stroke", color.highlight).raise().attr("stroke-width", 3);
     tooltip.style("opacity", 1).style("pointer-events", "auto");
     const highlightEvent = new CustomEvent('highlightState', { detail: { state } });
     window.dispatchEvent(highlightEvent);

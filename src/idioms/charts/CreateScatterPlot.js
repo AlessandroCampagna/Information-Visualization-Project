@@ -12,7 +12,8 @@ function handleHighlightState(event, dots) {
   const { state, stateAbbreviation } = event.detail;
   dots.filter(d => d.state === state || stateNameToAbbreviation[d.state] === stateAbbreviation)
     .attr("fill", color.highlight)
-    .attr("r", 7);
+    .attr("r", 7)
+    .raise();
 }
 
 function handleRemoveHighlightState(dots) {
@@ -53,7 +54,7 @@ function createPoints(svg, scatterData, x, y) {
     .attr("fill", color.primary)
     .attr("stroke", "black")
     .on("mouseover", function(event, d) {
-      d3.select(this).attr("fill", color.highlight).attr("r", 7);
+      d3.select(this).raise().attr("fill", color.highlight).attr("r", 7);
       tooltip.style("opacity", 1).style("pointer-events", "auto");
 
       const highlightEvent = new CustomEvent('highlightState', { detail: { state: d.state } });
