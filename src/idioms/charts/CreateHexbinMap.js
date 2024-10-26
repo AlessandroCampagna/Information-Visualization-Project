@@ -117,7 +117,15 @@ export function createHexbinMap(data) {
       .attr("text-anchor", "middle")
       .attr("alignment-baseline", "central")
       .style("font-size", 11)
-      .style("fill", "black")
+      .style("fill", function(d) {
+        const stateAbbreviation = d.properties.iso3166_2;
+        const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+        const incidentCount = stateIncidentCounts.get(stateName) || 0;
+        const fillColor = colorScale(incidentCount);
+        const rgb = d3.color(fillColor).rgb();
+        const luminance = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
+        return luminance < 140 ? "white" : "black";
+      })
       .style("pointer-events", "none"); // Make labels hollow, allowing selection of elements underneath
 
   }).catch(function(error) {
