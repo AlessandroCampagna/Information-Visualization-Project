@@ -85,7 +85,7 @@ export function createHexbinMap(data) {
         return colorScale(incidentCount);
       })
       .attr("d", path)
-      .attr("stroke", "white")
+      .attr("stroke", "black")
       .on("mouseover", function(event, d) {
         d3.select(this).attr("fill", color.highlight); // Change color on hover
         const stateAbbreviation = d.properties.iso3166_2;
@@ -117,7 +117,7 @@ export function createHexbinMap(data) {
       .attr("text-anchor", "middle")
       .attr("alignment-baseline", "central")
       .style("font-size", 11)
-      .style("fill", "white");
+      .style("fill", "black");
 
   }).catch(function(error) {
     console.error("Error loading GeoJSON data:", error);

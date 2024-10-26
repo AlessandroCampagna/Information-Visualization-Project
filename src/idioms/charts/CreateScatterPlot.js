@@ -51,6 +51,7 @@ function createPoints(svg, scatterData, x, y) {
     .attr("cy", d => y(d.total_injured))
     .attr("r", 5)
     .attr("fill", color.primary)
+    .attr("stroke", "black")
     .on("mouseover", function(event, d) {
       d3.select(this).attr("fill", color.highlight).attr("r", 7);
       tooltip.style("opacity", 1).style("pointer-events", "auto");
