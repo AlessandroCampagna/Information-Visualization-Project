@@ -232,6 +232,7 @@ export function createScatterPlot(data) {
       window.dispatchEvent(removeHighlightEvent);
     })
     .on("click", function(event, d) {
+      tooltip.style("opacity", 0).style("pointer-events", "none");
       singleState(d.state);
     });
 
