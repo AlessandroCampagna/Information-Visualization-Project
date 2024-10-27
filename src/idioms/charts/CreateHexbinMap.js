@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import { legendColor } from 'd3-legend'; 
 import { selectState } from "../InitCharts";
 import { stateNameToAbbreviation } from "../channels/MapStates";
 import * as color from  "../channels/Colors";
@@ -24,6 +23,52 @@ function addEventListeners(svg, stateIncidentCounts, colorScale, stateText) {
       });
   });
 }
+
+function addColorLegend(svg, colorScale) {
+  // Legend dimensions
+  const legendHeight = 300;
+  const legendWidth = 25;
+  const legendPadding = 50;
+
+  // Legend scale (now vertical)
+  const legendScale = d3.scaleLinear()
+    .domain(colorScale.domain())
+    .range([legendHeight, 0]);
+
+  // Create a legend group
+  const legendGroup = svg.append("g")
+    .attr("class", "color-legend")
+    .attr("transform", `translate(${+svg.attr("width") - legendWidth - legendPadding}, ${svg.attr("height") / 2 - legendHeight / 2})`);
+
+  // Add a gradient rectangle for the legend color scale
+  legendGroup.append("rect")
+    .attr("width", legendWidth)
+    .attr("height", legendHeight)
+    .style("fill", "url(#legendGradient)");
+
+  // Create a gradient definition for the color scale
+  const defs = svg.append("defs");
+  const linearGradient = defs.append("linearGradient")
+    .attr("id", "legendGradient")
+    .attr("x1", "0%").attr("x2", "0%") // Vertical gradient
+    .attr("y1", "100%").attr("y2", "0%");
+
+  linearGradient.selectAll("stop")
+    .data(colorScale.ticks().map((t, i, n) => ({
+      offset: `${(100 * i) / (n.length - 1)}%`,
+      color: colorScale(t)
+    })))
+    .enter().append("stop")
+    .attr("offset", d => d.offset)
+    .attr("stop-color", d => d.color);
+
+  // Add legend scale labels
+  legendGroup.call(d3.axisLeft(legendScale)
+    .tickSize(6)
+    .ticks(5))
+    .select(".domain").remove();  // Remove the axis line
+}
+
 
 export function createHexbinMap(data) {
   // Select the container for the hexbin map
@@ -167,17 +212,8 @@ export function createHexbinMap(data) {
       })
       .style("pointer-events", "none"); // Make labels hollow, allowing selection of elements underneath
 
-    // Add the legend
-    const legend = legendColor()
-      .scale(colorScale)
-      .title("Incident Counts")
-      .labelFormat(d3.format(".0f"));
 
-    svg.append("g")
-      .attr("class", "legend")
-      .attr("transform", `translate(${width - 100}, 30)`)
-      .call(legend);
-
+      addColorLegend(svg, colorScale)
   }).catch(function(error) {
     console.error("Error loading GeoJSON data:", error);
   });
