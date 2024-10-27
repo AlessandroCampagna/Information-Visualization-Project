@@ -79,6 +79,25 @@ body, html, #root {
   font-size: 20px;
   text-align: center;
   padding: 20px;
+  position: relative; /* Make the navbar a positioned element */
+}
+
+/* Button styling */
+.top-right-button {
+  position: absolute;
+  top: 20px; /* Adjust spacing from the top */
+  right: 20px; /* Adjust spacing from the right */
+  background-color: #79a5ff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.top-right-button:hover {
+  background-color: #5890ff;
 }
 
 .slider-container {

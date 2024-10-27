@@ -22,11 +22,16 @@ function App() {
     setTimeRange(modulatedValues[0], modulatedValues[1]);
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <div className="app-container">
       <main className="dashboard">
         <div className='container navbar Navbar' id="navbar">
           <h1>Gun Violence in the United States</h1>
+          <button className="top-right-button" onClick={handleRefresh}>Clear</button>
           <div className="slider-container">
             <div className="slider-legend">
               <span>2014</span>
