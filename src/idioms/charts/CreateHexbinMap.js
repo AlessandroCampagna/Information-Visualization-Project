@@ -25,6 +25,17 @@ function addEventListeners(svg, stateIncidentCounts, colorScale, stateText) {
 }
 
 function addColorLegend(svg, colorScale) {
+
+  // Add a text at the top of the map saying "USA"
+  svg.append("text")
+    .attr("x", svg.attr("width") / 2)
+    .attr("y", 50)
+    .attr("text-anchor", "middle")
+    .style("font-size", "48px")
+    .style("font-weight", "bold")
+    .style("font-family", "Arial, sans-serif")
+    .text("USA");
+
   // Legend dimensions
   const legendHeight = 300;
   const legendWidth = 25;
