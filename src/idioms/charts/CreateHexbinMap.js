@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { legendColor } from 'd3-legend';
 import { selectState } from "../InitCharts";
 import { stateNameToAbbreviation } from "../channels/MapStates";
 import * as color from  "../channels/Colors";
@@ -65,7 +66,7 @@ export function createHexbinMap(data) {
 
   // Create a color scale
   const colorScale = d3.scaleSequential(d3.interpolateReds)
-    .domain([0, d3.max(stateIncidentCounts.values())]);
+    .domain([0, 17000]);
 
   // Add text element to display state name
   const stateText = svg.append("text")
@@ -146,6 +147,17 @@ export function createHexbinMap(data) {
         return luminance < 130 ? "white" : "black";
       })
       .style("pointer-events", "none"); // Make labels hollow, allowing selection of elements underneath
+
+    // Add the legend
+    const legend = legendColor()
+      .scale(colorScale)
+      .title("Incident Counts")
+      .labelFormat(d3.format(".0f"));
+
+    svg.append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${width - 100}, 30)`)
+      .call(legend);
 
   }).catch(function(error) {
     console.error("Error loading GeoJSON data:", error);

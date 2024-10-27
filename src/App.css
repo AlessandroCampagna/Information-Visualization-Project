@@ -40,7 +40,7 @@ body, html, #root {
 .dashboard {
   flex: 1;
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: auto 1fr 1fr;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   padding: 20px;
@@ -71,29 +71,43 @@ body, html, #root {
 }
 
 .container.navbar {
+  height: 175px;
   grid-column: span 2;
   background-color: gray;
   color: white;
   border-radius: 25px; /* Added for rounded corners */
-  grid-column: span;
   font-size: 20px;
   text-align: center;
   padding: 20px;
 }
 
-.small-slider {
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.slider-legend {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 10px;
+  width: 600px !important; /* Adjust the width as needed */
+}
+
+.slider {
   display: flex;
   justify-content: center;
   margin: 25px;
-  width: 500px !important; /* Adjust the width as needed */
-  height: 10px !important; /* Adjust the height as needed */
+  width: 550px !important; /* Adjust the width as needed */
 }
 
-.small-slider .range-slider__track {
+.slider .range-slider__track {
   height: 4px !important; /* Adjust the track height as needed */
 }
 
-.small-slider .range-slider__thumb {
+.slider .range-slider__thumb {
   width: 12px !important; /* Adjust the thumb width as needed */
   height: 12px !important; /* Adjust the thumb height as needed */
 }
