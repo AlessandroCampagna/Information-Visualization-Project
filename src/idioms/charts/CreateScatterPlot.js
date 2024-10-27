@@ -1,11 +1,11 @@
 import * as d3 from "d3";
+import { singleState } from "../InitCharts";
 import { stateNameToAbbreviation } from "../channels/MapStates";
 import * as color from "../channels/Colors";
 
 function addEventListeners(dots) {
   window.addEventListener('highlightState', (event) => handleHighlightState(event, dots));
   window.addEventListener('removeHighlightState', () => handleRemoveHighlightState(dots));
-  window.addEventListener('filterState', (event) => handleFilterState(event, dots));
 }
 
 function handleHighlightState(event, dots) {
@@ -18,12 +18,6 @@ function handleHighlightState(event, dots) {
 
 function handleRemoveHighlightState(dots) {
   dots.attr("fill", color.primary).attr("r", 5);
-}
-
-function handleFilterState(event, dots) {
-  const { stateAbbreviation } = event.detail;
-  dots.filter(d => stateNameToAbbreviation[d.state] !== stateAbbreviation)
-    .attr("r", 0);
 }
 
 function createTooltip() {
@@ -71,8 +65,10 @@ function createPoints(svg, scatterData, x, y) {
 
       const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state: d.state } });
       window.dispatchEvent(removeHighlightEvent);
+    })
+    .on ("click", function(event, d) {
+      singleState(d.state);
     });
-
   return dots;
 }
 

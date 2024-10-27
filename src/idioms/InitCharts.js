@@ -45,3 +45,13 @@ export function selectState(state){
   
   updateCharts();
 }
+
+export function singleState(state){
+  if (selectedStates.length != 1) {
+    selectedStates = [state];
+    updateCharts();
+  } else {
+    selectedStates = [];
+    initCharts();
+  }
+}

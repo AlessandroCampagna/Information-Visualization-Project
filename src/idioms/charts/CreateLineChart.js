@@ -1,10 +1,10 @@
 import * as d3 from "d3";
+import { singleState } from "../InitCharts";
 import { stateNameToAbbreviation } from "../channels/MapStates";
 import * as color from "../channels/Colors";
 
 function addEventListeners() {
   window.addEventListener('highlightState', handleHighlightState);
-  window.addEventListener('filterState', handleFilterState);
   window.addEventListener('removeHighlightState', handleRemoveHighlightState);
 }
 
@@ -15,13 +15,6 @@ function handleHighlightState(event) {
     .attr("stroke", color.highlight)
     .attr("stroke-width", 3)
     .raise();
-}
-
-function handleFilterState(event) {
-  const { stateAbbreviation } = event.detail;
-  d3.selectAll(".line")
-    .filter(d => stateNameToAbbreviation[d[0].state] !== stateAbbreviation)
-    .attr("stroke-width", 0);
 }
 
 function handleRemoveHighlightState() {
@@ -73,6 +66,9 @@ function createLine(svg, stateData, x, y, state, tooltip) {
     tooltip.style("opacity", 0).style("pointer-events", "none");
     const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state } });
     window.dispatchEvent(removeHighlightEvent);
+  })
+  .on("click", function(event) {
+    singleState(state);
   });
 }
 

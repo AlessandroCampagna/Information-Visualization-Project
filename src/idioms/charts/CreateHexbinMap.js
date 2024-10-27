@@ -22,12 +22,6 @@ function addEventListeners(svg, stateIncidentCounts, colorScale, stateText) {
         return colorScale(incidentCount);
       });
   });
-
-  window.addEventListener('filterState', (event) => {
-    const { stateAbbreviation } = event.detail;
-    const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
-    stateText.text(stateName);
-  });
 }
 
 export function createHexbinMap(data) {
