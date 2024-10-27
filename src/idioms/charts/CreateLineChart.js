@@ -58,8 +58,8 @@ function createLine(svg, stateData, x, y, state, tooltip) {
   .on("mousemove", function(event, d) {
     const [xPos, yPos] = d3.pointer(event);
     tooltip.html(`State: ${state}<br>Total Incidents: ${d3.sum(stateData, d => d.count)}`)
-      .style("left", (xPos + 70) + "px")
-      .style("top", (yPos) + "px");
+    .style("left", (event.pageX + 10) + "px")
+    .style("top", (event.pageY - 28) + "px");
   })
   .on("mouseout", function() {
     d3.select(this).attr("stroke", color.primary).attr("stroke-width", 1.5);
