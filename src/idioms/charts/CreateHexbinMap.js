@@ -142,6 +142,7 @@ export function createHexbinMap(data) {
       })
       .on("click", function(event, d) {
         selectState(Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === d.properties.iso3166_2));
+        tooltip.style("display", "none");
       });
 
     // Add the labels
