@@ -130,7 +130,7 @@ export function createHexbinMap(data) {
 
   // Create a color scale
   const colorScale = d3.scaleSequential(d3.interpolateReds)
-    .domain([0, 17000]);
+    .domain([0, 20000]);
 
   // Add text element to display state name
   const stateText = svg.append("text")
