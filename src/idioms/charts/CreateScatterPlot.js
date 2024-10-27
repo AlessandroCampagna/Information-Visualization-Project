@@ -168,5 +168,8 @@ export function createScatterPlot(data) {
     .attr("d", line)
     .attr("stroke", "gray")
     .attr("stroke-width", 2)
-    .attr("fill", "none");
+    .attr("fill", "none")
+    .on("mouseover", function(event, d) {
+      d3.select(this).raise();
+    });
 }
