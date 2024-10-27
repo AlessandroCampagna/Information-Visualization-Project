@@ -70,6 +70,30 @@ body, html, #root {
   border-radius: 25px; /* Added for rounded corners */
 }
 
+.container.navbar {
+  grid-column: span 2;
+  background-color: gray;
+  color: white;
+  border-radius: 25px; /* Added for rounded corners */
+  grid-column: span;
+  font-size: 20px;
+  text-align: center;
+  padding: 20px;
+}
+
+.date-range-slider {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.date-range-slider label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* Media Query for responsiveness */
 @media (max-width: 768px) {
   .dashboard {
