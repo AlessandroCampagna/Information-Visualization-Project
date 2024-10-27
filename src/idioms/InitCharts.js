@@ -49,7 +49,10 @@ export function selectState(state){
     selectedStates = [state];
   } else if (!selectedStates.includes(state)) {
     selectedStates.push(state);
-  } else {
+  } else if(selectedStates.length === 1){
+    selectedStates=allStates;
+  }
+  else {
     selectedStates = selectedStates.filter(s => s !== state);
   }
 
