@@ -31,7 +31,7 @@ function App() {
       <main className="dashboard">
         <div className='container navbar Navbar' id="navbar">
           <h1>Gun Violence in the United States</h1>
-          <button className="top-right-button" onClick={handleRefresh}>Clear</button>
+          <button className="top-right-button" onClick={handleRefresh}>Reset</button>
           <div className="slider-container">
             <div className="slider-legend">
               <span>2014</span>
