@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import { stateNameToAbbreviation } from "../channels/MapStates";
 import * as color from  "../channels/Colors";
 
-function addEventListeners(svg, stateIncidentCounts, colorScale) {
+function addEventListeners(svg, stateIncidentCounts, colorScale, stateText) {
   window.addEventListener('highlightState', (event) => {
     const { state } = event.detail;
     const stateAbbreviation = stateNameToAbbreviation[state];
@@ -20,6 +20,12 @@ function addEventListeners(svg, stateIncidentCounts, colorScale) {
         const incidentCount = stateIncidentCounts.get(state) || 0;
         return colorScale(incidentCount);
       });
+  });
+
+  window.addEventListener('filterState', (event) => {
+    const { stateAbbreviation } = event.detail;
+    const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+    stateText.text(stateName);
   });
 }
 
@@ -66,6 +72,14 @@ export function createHexbinMap(data) {
   const colorScale = d3.scaleSequential(d3.interpolateReds)
     .domain([0, d3.max(stateIncidentCounts.values())]);
 
+  // Add text element to display state name
+  const stateText = svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", 30)
+    .attr("text-anchor", "middle")
+    .style("font-size", "24px")
+    .style("fill", "black");
+
   // Load external data and boot
   d3.json(process.env.PUBLIC_URL + "/data/hexgrid.geojson.json").then(function(geoData) {
     if (!geoData) {
@@ -73,37 +87,49 @@ export function createHexbinMap(data) {
       return;
     }
 
+    // Calculate the bounds of the geoData
+    const bounds = d3.geoBounds(geoData);
+    const center = d3.geoCentroid(geoData);
+    const distance = d3.geoDistance(bounds[0], bounds[1]);
+    const scale = (width / distance) * 0.5; // Adjust scale factor as needed
+
+    // Update the projection with the new scale and center
+    projection
+      .scale(scale)
+      .center(center)
+      .translate([width / 2, height / 2]);
+
     // Draw the map
     svg.append("g")
       .selectAll("path")
       .data(geoData.features)
       .join("path")
       .attr("fill", d => {
-        const stateAbbreviation = d.properties.iso3166_2;
-        const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
-        const incidentCount = stateIncidentCounts.get(stateName) || 0;
-        return colorScale(incidentCount);
+      const stateAbbreviation = d.properties.iso3166_2;
+      const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+      const incidentCount = stateIncidentCounts.get(stateName) || 0;
+      return colorScale(incidentCount);
       })
       .attr("d", path)
       .attr("stroke", "black")
       .on("mouseover", function(event, d) {
-        d3.select(this).attr("fill", color.highlight); // Change color on hover
-        const stateAbbreviation = d.properties.iso3166_2;
-        const highlightEvent = new CustomEvent('highlightState', { detail: { stateAbbreviation } });
-        window.dispatchEvent(highlightEvent);
+      d3.select(this).attr("fill", color.highlight); // Change color on hover
+      const stateAbbreviation = d.properties.iso3166_2;
+      const highlightEvent = new CustomEvent('highlightState', { detail: { stateAbbreviation } });
+      window.dispatchEvent(highlightEvent);
       })
       .on("mouseout", function(event, d) {
-        const stateAbbreviation = d.properties.iso3166_2;
-        const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
-        const incidentCount = stateIncidentCounts.get(stateName) || 0;
-        d3.select(this).attr("fill", colorScale(incidentCount)); // Revert color on mouse out
-        const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { stateAbbreviation } });
-        window.dispatchEvent(removeHighlightEvent);
+      const stateAbbreviation = d.properties.iso3166_2;
+      const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+      const incidentCount = stateIncidentCounts.get(stateName) || 0;
+      d3.select(this).attr("fill", colorScale(incidentCount)); // Revert color on mouse out
+      const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { stateAbbreviation } });
+      window.dispatchEvent(removeHighlightEvent);
       })
       .on("click", function(event, d) {
-        const stateAbbreviation = d.properties.iso3166_2;
-        const filterEvent = new CustomEvent('filterState', { detail: { stateAbbreviation } });
-        window.dispatchEvent(filterEvent);
+      const stateAbbreviation = d.properties.iso3166_2;
+      const filterEvent = new CustomEvent('filterState', { detail: { stateAbbreviation } });
+      window.dispatchEvent(filterEvent);
       });
 
     // Add the labels
@@ -124,7 +150,7 @@ export function createHexbinMap(data) {
         const fillColor = colorScale(incidentCount);
         const rgb = d3.color(fillColor).rgb();
         const luminance = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
-        return luminance < 140 ? "white" : "black";
+        return luminance < 130 ? "white" : "black";
       })
       .style("pointer-events", "none"); // Make labels hollow, allowing selection of elements underneath
 
@@ -132,5 +158,5 @@ export function createHexbinMap(data) {
     console.error("Error loading GeoJSON data:", error);
   });
 
-  addEventListeners(svg, stateIncidentCounts, colorScale);
+  addEventListeners(svg, stateIncidentCounts, colorScale, stateText);
 }
