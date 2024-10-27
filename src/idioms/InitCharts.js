@@ -4,9 +4,9 @@ import { createScatterPlot } from './charts/CreateScatterPlot';
 import { createHexbinMap } from './charts/CreateHexbinMap';
 import { allStates } from './channels/MapStates';
 
-let selectedStates = [];
-let start = 2014
-let end = 2018
+var selectedStates = [];
+var _start = 2014
+var _end = 2018
 
 function createCharts(data) {
   createLineChart(data);
@@ -34,10 +34,8 @@ function updateCharts() {
     // Filter out the selected states from the data
     const filteredData = data.filter(d =>
       selectedStates.includes(d.state) 
-      && parseInt(d.year) >= start && parseInt(d.year) <= end
+      && parseInt(d.year) >= _start && parseInt(d.year) <= _end
     );
-
-    console.log(start, end, filteredData);
     
     createCharts(filteredData);
 
@@ -69,7 +67,7 @@ export function singleState(state){
 }
 
 export function setTimeRange(start, end){
-  start = start;
-  end = end;
+  _start = start;
+  _end = end;
   updateCharts();
 }
