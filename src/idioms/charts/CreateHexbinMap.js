@@ -28,16 +28,15 @@ function addColorLegend(svg, colorScale) {
 
   // Add a text at the top of the map saying "USA"
   svg.append("text")
-    .attr("x", svg.attr("width") / 2)
+    .attr("x", svg.attr("width") / 1.94)
     .attr("y", 50)
     .attr("text-anchor", "middle")
-    .style("font-size", "48px")
-    .style("font-weight", "bold")
+    .style("font-size", "40px")
     .style("font-family", "Arial, sans-serif")
     .text("USA");
 
   // Legend dimensions
-  const legendHeight = 300;
+  const legendHeight = 200;
   const legendWidth = 25;
   const legendPadding = 50;
 
