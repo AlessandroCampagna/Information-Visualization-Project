@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import './App.css';
-import { createCharts } from './idioms/CreateCharts'; // Import the init function for the visualizations
+import { initCharts } from './idioms/InitCharts'; // Import the init function for the visualizations
 
 function App() {
   useEffect(() => {
-    createCharts(); // Initialize the visualizations
+    initCharts(); // Initialize the visualizations
   }, []);
 
   return (
