@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { legendColor } from 'd3-legend';
+import { legendColor } from 'd3-legend'; 
 import { selectState } from "../InitCharts";
 import { stateNameToAbbreviation } from "../channels/MapStates";
 import * as color from  "../channels/Colors";
@@ -52,6 +52,15 @@ export function createHexbinMap(data) {
     return;
   }
 
+  // Create a tooltip element
+  const tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("position", "absolute")
+    .style("background", "white")
+    .style("border", "1px solid #ccc")
+    .style("padding", "10px")
+    .style("display", "none");
+
   // Map and projection
   const projection = d3.geoMercator()
     .scale(450) // This is the zoom
@@ -101,26 +110,35 @@ export function createHexbinMap(data) {
       .data(geoData.features)
       .join("path")
       .attr("fill", d => {
-      const stateAbbreviation = d.properties.iso3166_2;
-      const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
-      const incidentCount = stateIncidentCounts.get(stateName) || 0;
-      return colorScale(incidentCount);
+        const stateAbbreviation = d.properties.iso3166_2;
+        const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+        const incidentCount = stateIncidentCounts.get(stateName) || 0;
+        return colorScale(incidentCount);
       })
       .attr("d", path)
       .attr("stroke", "black")
       .on("mouseover", function(event, d) {
-      d3.select(this).attr("fill", color.highlight); // Change color on hover
-      const stateAbbreviation = d.properties.iso3166_2;
-      const highlightEvent = new CustomEvent('highlightState', { detail: { stateAbbreviation } });
-      window.dispatchEvent(highlightEvent);
+        d3.select(this).attr("fill", color.highlight); // Change color on hover
+        const stateAbbreviation = d.properties.iso3166_2;
+        const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+        const incidentCount = stateIncidentCounts.get(stateName) || 0;
+        tooltip.style("display", "block")
+          .html(`<strong>${stateName}</strong><br>Incidents: ${incidentCount}`);
+        const highlightEvent = new CustomEvent('highlightState', { detail: { stateAbbreviation } });
+        window.dispatchEvent(highlightEvent);
+      })
+      .on("mousemove", function(event) {
+        tooltip.style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 20) + "px");
       })
       .on("mouseout", function(event, d) {
-      const stateAbbreviation = d.properties.iso3166_2;
-      const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
-      const incidentCount = stateIncidentCounts.get(stateName) || 0;
-      d3.select(this).attr("fill", colorScale(incidentCount)); // Revert color on mouse out
-      const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { stateAbbreviation } });
-      window.dispatchEvent(removeHighlightEvent);
+        const stateAbbreviation = d.properties.iso3166_2;
+        const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
+        const incidentCount = stateIncidentCounts.get(stateName) || 0;
+        d3.select(this).attr("fill", colorScale(incidentCount)); // Revert color on mouse out
+        tooltip.style("display", "none");
+        const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { stateAbbreviation } });
+        window.dispatchEvent(removeHighlightEvent);
       })
       .on("click", function(event, d) {
         selectState(Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === d.properties.iso3166_2));
