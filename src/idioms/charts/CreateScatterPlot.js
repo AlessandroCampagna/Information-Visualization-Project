@@ -154,6 +154,13 @@ export function createScatterPlot(data) {
   const { x, y } = createScales(scatterData, width, height);
   const { xAxis, yAxis } = createAxes(svg, x, y, width, height, margin);
 
+  // Define a clipping path
+  svg.append("defs").append("clipPath")
+    .attr("id", "clip")
+    .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+
   // Create a transparent rectangle to capture zoom events
   svg.append("rect")
     .attr("width", width)
@@ -180,15 +187,63 @@ export function createScatterPlot(data) {
       })
     );
 
-  const dots = createPoints(svg, scatterData, x, y);
+  // Create the tooltip
+  const tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0)
+    .style("position", "absolute")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("pointer-events", "none");
+
+  // Create the dots within a group and apply the clipping path
+  const dots = svg.append("g")
+    .attr("clip-path", "url(#clip)")
+    .selectAll(".dot")
+    .data(scatterData)
+    .enter()
+    .append("circle")
+    .attr("class", "dot")
+    .attr("cx", d => x(d.total_killed))
+    .attr("cy", d => y(d.total_injured))
+    .attr("r", 5)
+    .attr("fill", color.primary)
+    .attr("stroke", "black")
+    .on("mouseover", function(event, d) {
+      d3.select(this).raise().attr("fill", color.highlight).attr("r", 7);
+      tooltip.style("opacity", 1).style("pointer-events", "auto");
+
+      const highlightEvent = new CustomEvent('highlightState', { detail: { state: d.state } });
+      window.dispatchEvent(highlightEvent);
+    })
+    .on("mousemove", function(event, d) {
+      tooltip.html(`State: ${d.state}<br>Year: ${d.year}<br>Total Injuries: ${d.total_injured}<br>Total Kills: ${d.total_killed}`)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 28) + "px");
+    })
+    .on("mouseout", function(event, d) {
+      d3.select(this).attr("fill", color.primary).attr("r", 5);
+      tooltip.style("opacity", 0).style("pointer-events", "none");
+
+      const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state: d.state } });
+      window.dispatchEvent(removeHighlightEvent);
+    })
+    .on("click", function(event, d) {
+      singleState(d.state);
+    });
+
   const line = calculateRegressionLine(scatterData, x, y);
 
   addEventListeners(dots);
 
-  // Append the regression line to the SVG
+  // Append the regression line to the SVG and apply the clipping path
   const regressionLine = svg.append("path")
     .datum(scatterData)
     .attr("class", "regression-line")
+    .attr("clip-path", "url(#clip)")
     .attr("d", line)
     .attr("stroke", "gray")
     .attr("stroke-width", 2)
@@ -196,5 +251,4 @@ export function createScatterPlot(data) {
     .on("mouseover", function(event, d) {
       d3.select(this).raise(); // Bring the regression line to the front on mouseover
     });
-
 }
