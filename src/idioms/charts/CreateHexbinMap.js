@@ -181,6 +181,10 @@ export function createHexbinMap(data) {
         const highlightEvent = new CustomEvent('highlightState', { detail: { stateAbbreviation } });
         window.dispatchEvent(highlightEvent);
       })
+      .on("mousemove", function(event) {
+        tooltip.style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 20) + "px");
+      })
       .on("mouseout", function(event, d) {
         const stateAbbreviation = d.properties.iso3166_2;
         const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
