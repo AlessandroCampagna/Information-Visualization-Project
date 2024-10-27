@@ -160,8 +160,7 @@ export function createHexbinMap(data) {
       .center(center)
       .translate([width / 2, height / 2]);
 
-    // Draw the map
-    svg.append("g")
+      svg.append("g")
       .selectAll("path")
       .data(geoData.features)
       .join("path")
@@ -169,7 +168,7 @@ export function createHexbinMap(data) {
         const stateAbbreviation = d.properties.iso3166_2;
         const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
         const incidentCount = stateIncidentCounts.get(stateName) || 0;
-        return colorScale(incidentCount);
+        return incidentCount === 0 ? "#cccccc" : colorScale(incidentCount); // Set color to gray if incidentCount is 0
       })
       .attr("d", path)
       .attr("stroke", "black")
@@ -183,15 +182,11 @@ export function createHexbinMap(data) {
         const highlightEvent = new CustomEvent('highlightState', { detail: { stateAbbreviation } });
         window.dispatchEvent(highlightEvent);
       })
-      .on("mousemove", function(event) {
-        tooltip.style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 20) + "px");
-      })
       .on("mouseout", function(event, d) {
         const stateAbbreviation = d.properties.iso3166_2;
         const stateName = Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === stateAbbreviation);
         const incidentCount = stateIncidentCounts.get(stateName) || 0;
-        d3.select(this).attr("fill", colorScale(incidentCount)); // Revert color on mouse out
+        d3.select(this).attr("fill", incidentCount === 0 ? "#cccccc" : colorScale(incidentCount)); // Revert color to gray if incidentCount is 0
         tooltip.style("display", "none");
         const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { stateAbbreviation } });
         window.dispatchEvent(removeHighlightEvent);
@@ -200,7 +195,7 @@ export function createHexbinMap(data) {
         selectState(Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === d.properties.iso3166_2));
         tooltip.style("display", "none");
       });
-
+    
     // Add the labels
     svg.append("g")
       .selectAll("labels")
