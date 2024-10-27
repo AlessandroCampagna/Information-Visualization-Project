@@ -27,7 +27,7 @@ function App() {
       <main className="dashboard">
         <div className='container navbar Navbar' id="navbar">
           <h1>Gun Violence in the United States</h1>
-          <RangeSlider value={sliderValues} onInput={handleSliderChange} />
+          <RangeSlider className="small-slider" value={sliderValues} onInput={handleSliderChange} />
         </div>
         <div className="container large LineChart" id="linechart"></div>
         <div className="container small HexbinMap" id="hexbinmap"></div>

@@ -5,8 +5,8 @@ import { createHexbinMap } from './charts/CreateHexbinMap';
 import { allStates } from './channels/MapStates';
 
 let selectedStates = [];
-let start = "2014-01-01";
-let end = "2018-12-31";
+let start = 2014
+let end = 2018
 
 function createCharts(data) {
   createLineChart(data);
@@ -32,18 +32,14 @@ function updateCharts() {
   d3.csv(process.env.PUBLIC_URL + "/data/data.csv").then(data => {
 
     // Filter out the selected states from the data
-    const filteredData = data.filter(d => 
+    const filteredData = data.filter(d =>
       selectedStates.includes(d.state) 
-      && d.date >= start && d.date <= end
+      && parseInt(d.year) >= start && parseInt(d.year) <= end
     );
 
-    console.log(start);
-    console.log(end);
+    console.log(start, end, filteredData);
     
-
-
     createCharts(filteredData);
-    console.log(filteredData);
 
   }).catch(error => {
     console.error("Error loading the dataset:", error);
@@ -51,7 +47,7 @@ function updateCharts() {
 }
 
 export function selectState(state){
-  if (selectedStates.length == allStates.length) {
+  if (selectedStates.length === allStates.length) {
     selectedStates = [state];
   } else if (!selectedStates.includes(state)) {
     selectedStates.push(state);
@@ -63,7 +59,7 @@ export function selectState(state){
 }
 
 export function singleState(state){
-  if (selectedStates.length != 1) {
+  if (selectedStates.length !== 1) {
     selectedStates = [state];
   } else {
     selectedStates = allStates;
@@ -72,9 +68,8 @@ export function singleState(state){
   updateCharts();
 }
 
-export function setTimeRange(startDate, endDate){
-  start = `${startDate}-01-01`;
-  end = `${endDate}-12-31`;
-  console.log(start, end);
+export function setTimeRange(start, end){
+  start = start;
+  end = end;
   updateCharts();
 }

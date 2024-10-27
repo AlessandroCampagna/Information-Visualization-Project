@@ -81,17 +81,21 @@ body, html, #root {
   padding: 20px;
 }
 
-.date-range-slider {
+.small-slider {
   display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: 10px;
+  justify-content: center;
+  margin: 25px;
+  width: 500px !important; /* Adjust the width as needed */
+  height: 10px !important; /* Adjust the height as needed */
 }
 
-.date-range-slider label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.small-slider .range-slider__track {
+  height: 4px !important; /* Adjust the track height as needed */
+}
+
+.small-slider .range-slider__thumb {
+  width: 12px !important; /* Adjust the thumb width as needed */
+  height: 12px !important; /* Adjust the thumb height as needed */
 }
 
 /* Media Query for responsiveness */
