@@ -71,6 +71,7 @@ body, html, #root {
 }
 
 .container.navbar {
+  height: 175px;
   grid-column: span 2;
   background-color: gray;
   color: white;
