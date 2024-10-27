@@ -154,6 +154,32 @@ export function createScatterPlot(data) {
   const { x, y } = createScales(scatterData, width, height);
   const { xAxis, yAxis } = createAxes(svg, x, y, width, height, margin);
 
+  // Create a transparent rectangle to capture zoom events
+  svg.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .call(d3.zoom()
+      .scaleExtent([0.5, 20]) // Set the zoom scale limits
+      .extent([[0, 0], [width, height]]) // Define the zoomable area
+      .on("zoom", (event) => {
+        const transform = event.transform;
+        const newX = transform.rescaleX(x); // Rescale the x-axis
+        const newY = transform.rescaleY(y); // Rescale the y-axis
+
+        // Update the axes with the new scales
+        xAxis.call(d3.axisBottom(newX));
+        yAxis.call(d3.axisLeft(newY));
+
+        // Update the positions of the dots with the new scales
+        dots.attr("cx", d => newX(d.total_killed)).attr("cy", d => newY(d.total_injured));
+
+        // Update the regression line with the new scales
+        regressionLine.attr("d", calculateRegressionLine(scatterData, newX, newY));
+      })
+    );
+
   const dots = createPoints(svg, scatterData, x, y);
   const line = calculateRegressionLine(scatterData, x, y);
 
@@ -170,27 +196,5 @@ export function createScatterPlot(data) {
     .on("mouseover", function(event, d) {
       d3.select(this).raise(); // Bring the regression line to the front on mouseover
     });
-  
-  // Create the zoom behavior
-  const zoom = d3.zoom()
-    .scaleExtent([0.5, 20]) // Set the zoom scale limits
-    .extent([[0, 0], [width, height]]) // Define the zoomable area
-    .on("zoom", (event) => {
-      const transform = event.transform;
-      const newX = transform.rescaleX(x); // Rescale the x-axis
-      const newY = transform.rescaleY(y); // Rescale the y-axis
-  
-      // Update the axes with the new scales
-      xAxis.call(d3.axisBottom(newX));
-      yAxis.call(d3.axisLeft(newY));
-  
-      // Update the positions of the dots with the new scales
-      dots.attr("cx", d => newX(d.total_killed)).attr("cy", d => newY(d.total_injured));
-  
-      // Update the regression line with the new scales
-      regressionLine.attr("d", calculateRegressionLine(scatterData, newX, newY));
-    });
-  
-  // Apply the zoom behavior to the SVG container
-  svg.call(zoom);
+
 }
