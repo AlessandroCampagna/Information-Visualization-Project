@@ -73,11 +73,11 @@ function createPoints(svg, scatterData, x, y) {
 }
 
 function createAxes(svg, x, y, width, height, margin) {
-  svg.append("g")
+  const xAxis = svg.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x));
 
-  svg.append("g").call(d3.axisLeft(y));
+  const yAxis = svg.append("g").call(d3.axisLeft(y));
 
   svg.append("text")
     .attr("text-anchor", "end")
@@ -91,6 +91,8 @@ function createAxes(svg, x, y, width, height, margin) {
     .attr("y", -margin.left + 20)
     .attr("x", -margin.top)
     .text("Number of Injuries");
+
+  return { xAxis, yAxis };
 }
 
 function prepareScatterData(data) {
@@ -150,22 +152,103 @@ export function createScatterPlot(data) {
   const svg = createSvgContainer(margin, width, height);
   const scatterData = prepareScatterData(data);
   const { x, y } = createScales(scatterData, width, height);
+  const { xAxis, yAxis } = createAxes(svg, x, y, width, height, margin);
 
-  createAxes(svg, x, y, width, height, margin);
+  // Define a clipping path
+  svg.append("defs").append("clipPath")
+    .attr("id", "clip")
+    .append("rect")
+    .attr("width", width)
+    .attr("height", height);
 
-  const dots = createPoints(svg, scatterData, x, y);
+  // Create a transparent rectangle to capture zoom events
+  svg.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .call(d3.zoom()
+      .scaleExtent([0.5, 20]) // Set the zoom scale limits
+      .extent([[0, 0], [width, height]]) // Define the zoomable area
+      .on("zoom", (event) => {
+        const transform = event.transform;
+        const newX = transform.rescaleX(x); // Rescale the x-axis
+        const newY = transform.rescaleY(y); // Rescale the y-axis
+
+        // Update the axes with the new scales
+        xAxis.call(d3.axisBottom(newX));
+        yAxis.call(d3.axisLeft(newY));
+
+        // Update the positions of the dots with the new scales
+        dots.attr("cx", d => newX(d.total_killed)).attr("cy", d => newY(d.total_injured));
+
+        // Update the regression line with the new scales
+        regressionLine.attr("d", calculateRegressionLine(scatterData, newX, newY));
+      })
+    );
+
+  // Create the tooltip
+  const tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0)
+    .style("position", "absolute")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("pointer-events", "none");
+
+  // Create the dots within a group and apply the clipping path
+  const dots = svg.append("g")
+    .attr("clip-path", "url(#clip)")
+    .selectAll(".dot")
+    .data(scatterData)
+    .enter()
+    .append("circle")
+    .attr("class", "dot")
+    .attr("cx", d => x(d.total_killed))
+    .attr("cy", d => y(d.total_injured))
+    .attr("r", 5)
+    .attr("fill", color.primary)
+    .attr("stroke", "black")
+    .on("mouseover", function(event, d) {
+      d3.select(this).raise().attr("fill", color.highlight).attr("r", 7);
+      tooltip.style("opacity", 1).style("pointer-events", "auto");
+
+      const highlightEvent = new CustomEvent('highlightState', { detail: { state: d.state } });
+      window.dispatchEvent(highlightEvent);
+    })
+    .on("mousemove", function(event, d) {
+      tooltip.html(`State: ${d.state}<br>Year: ${d.year}<br>Total Injuries: ${d.total_injured}<br>Total Kills: ${d.total_killed}`)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 28) + "px");
+    })
+    .on("mouseout", function(event, d) {
+      d3.select(this).attr("fill", color.primary).attr("r", 5);
+      tooltip.style("opacity", 0).style("pointer-events", "none");
+
+      const removeHighlightEvent = new CustomEvent('removeHighlightState', { detail: { state: d.state } });
+      window.dispatchEvent(removeHighlightEvent);
+    })
+    .on("click", function(event, d) {
+      singleState(d.state);
+    });
+
   const line = calculateRegressionLine(scatterData, x, y);
 
   addEventListeners(dots);
 
-  svg.append("path")
+  // Append the regression line to the SVG and apply the clipping path
+  const regressionLine = svg.append("path")
     .datum(scatterData)
     .attr("class", "regression-line")
+    .attr("clip-path", "url(#clip)")
     .attr("d", line)
     .attr("stroke", "gray")
     .attr("stroke-width", 2)
     .attr("fill", "none")
     .on("mouseover", function(event, d) {
-      d3.select(this).raise();
+      d3.select(this).raise(); // Bring the regression line to the front on mouseover
     });
 }
