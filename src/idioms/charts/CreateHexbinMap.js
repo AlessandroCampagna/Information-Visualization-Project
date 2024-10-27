@@ -54,7 +54,9 @@ function addColorLegend(svg, colorScale) {
   legendGroup.append("rect")
     .attr("width", legendWidth)
     .attr("height", legendHeight)
-    .style("fill", "url(#legendGradient)");
+    .style("fill", "url(#legendGradient)")
+    .style("stroke", "black")
+    .style("stroke-width", 1);
 
   // Create a gradient definition for the color scale
   const defs = svg.append("defs");
@@ -74,7 +76,7 @@ function addColorLegend(svg, colorScale) {
 
   // Add legend scale labels
   legendGroup.call(d3.axisLeft(legendScale)
-    .tickSize(6)
+    .tickSize(10)
     .ticks(5))
     .select(".domain").remove();  // Remove the axis line
 }
