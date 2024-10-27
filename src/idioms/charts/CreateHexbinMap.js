@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { selectState } from "../InitCharts";
 import { stateNameToAbbreviation } from "../channels/MapStates";
 import * as color from  "../channels/Colors";
 
@@ -127,9 +128,7 @@ export function createHexbinMap(data) {
       window.dispatchEvent(removeHighlightEvent);
       })
       .on("click", function(event, d) {
-      const stateAbbreviation = d.properties.iso3166_2;
-      const filterEvent = new CustomEvent('filterState', { detail: { stateAbbreviation } });
-      window.dispatchEvent(filterEvent);
+        selectState(Object.keys(stateNameToAbbreviation).find(key => stateNameToAbbreviation[key] === d.properties.iso3166_2));
       });
 
     // Add the labels

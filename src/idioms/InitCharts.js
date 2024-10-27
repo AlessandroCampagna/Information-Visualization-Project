@@ -36,7 +36,12 @@ function updateCharts() {
   });
 }
 
-export function addState(state){
-  selectedStates.push(state);
+export function selectState(state){
+  if (!selectedStates.includes(state)) {
+    selectedStates.push(state);
+  } else {
+    selectedStates = selectedStates.filter(s => s !== state);
+  }
+  
   updateCharts();
 }
