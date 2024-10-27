@@ -39,11 +39,14 @@ function updateCharts() {
 export function selectState(state){
   if (!selectedStates.includes(state)) {
     selectedStates.push(state);
+    updateCharts();
+  } else if (selectedStates.length === 1) {
+    selectedStates = [];
+    initCharts();
   } else {
     selectedStates = selectedStates.filter(s => s !== state);
+    updateCharts();
   }
-  
-  updateCharts();
 }
 
 export function singleState(state){
